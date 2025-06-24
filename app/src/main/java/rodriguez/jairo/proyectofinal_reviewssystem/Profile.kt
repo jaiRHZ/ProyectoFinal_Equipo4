@@ -81,7 +81,6 @@ class Profile : AppCompatActivity() {
             holder.starsImageView.setImageResource(film.stars)
             holder.movieImageView.setImageResource(film.image)
 
-            // CAMBIO: Ahora asignamos correctamente
             holder.reviewTextView.text = film.review
             holder.descriptionTextView.text = film.description
         }
