@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    //Blanco para titulos y ediText
+
+
+    //Blanco para titulos y editText
+
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
@@ -9,4 +12,5 @@
     <color name="fondoNegro">#141414</color>
     <color name="boton">#F40612</color>
     <color name="tituloRojo">#E50914</color>
+
 </resources>

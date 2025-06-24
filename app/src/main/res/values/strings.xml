@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ProyectoFinal_ReviewsSystem</string>
+
     <string name="signup_title">Sign up to iThink</string>
     <string name="signup_name">Name</string>
     <string name="signup_email">Email</string>
@@ -42,5 +42,10 @@
     <string name="add_content_cancel_button">Cancel</string>
 
 
+    <string name="app_name">iThink</string>
+    <string name="login_title">Sign in to</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login_button">Login</string>
 
 </resources>
