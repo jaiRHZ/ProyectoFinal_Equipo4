@@ -50,9 +50,19 @@ class UserConfiguration : AppCompatActivity() {
             showGenderSelector()
         }
 
-        btnSave_setting.setOnClickListener {  }
-        btnChangePass_setting.setOnClickListener {  }
-        btnLogout_setting.setOnClickListener {  }
+        btnSave_setting.setOnClickListener {
+            val intent = Intent(this, Home::class.java)
+            startActivity(intent)
+        }
+        btnChangePass_setting.setOnClickListener {
+            val intent = Intent(this, ConfirmChange::class.java)
+            startActivity(intent)
+        }
+
+        btnLogout_setting.setOnClickListener {
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
+        }
 
     }
 
