@@ -41,4 +41,7 @@
     <string name="add_content_add_button">Add</string>
     <string name="add_content_cancel_button">Cancel</string>
 
+    <string name="edit_content_title">Edit Content</string>
+    <string name="edit_content_apply_changes">Apply changes</string>
+
 </resources>
