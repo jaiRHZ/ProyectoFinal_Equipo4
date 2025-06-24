@@ -8,13 +8,80 @@
     android:orientation="vertical"
     tools:context=".Login">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:paddingBottom="15dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textSign"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/login_title"
+            android:textSize="40sp"
+            android:fontFamily="@font/inter_18pt_bold"
+            android:layout_marginLeft="40dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="40sp"
+            android:fontFamily="@font/inter_18pt_bold"
+            android:textColor="@color/tituloRojo"
+            android:layout_marginLeft="20dp"
+            android:layout_gravity="end"
+            />
+    </LinearLayout>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/login_title"
-        android:textSize="40sp"
+        android:text="@string/email"
+        android:textSize="32sp"
+        android:textColor="@color/subtituloGris"
+        android:paddingTop="15dp"
+        android:layout_marginLeft="40dp"
+        />
+
+    <EditText
+        android:layout_width="330dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="40dp"
+        android:background="@color/white"
+        android:textColor="@color/black"
+        android:layout_marginBottom="40dp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/password"
+        android:textSize="32sp"
+        android:textColor="@color/subtituloGris"
+        android:layout_marginLeft="40dp"
+        />
+
+    <EditText
+        android:layout_width="330dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="40dp"
+        android:background="@color/white"
+        android:textColor="@color/black"
+        android:layout_marginBottom="65dp"
+        android:inputType="textPassword"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/login_button"
+        android:textSize="20sp"
         android:fontFamily="@font/inter_18pt_bold"
-        android:textStyle="bold"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center"
+        />
 
 </LinearLayout>
