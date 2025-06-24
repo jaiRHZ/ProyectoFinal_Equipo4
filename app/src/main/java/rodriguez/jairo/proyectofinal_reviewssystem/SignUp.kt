@@ -2,7 +2,9 @@ package rodriguez.jairo.proyectofinal_reviewssystem
 
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -28,6 +30,8 @@ class SignUp : AppCompatActivity() {
         etBirthdate = findViewById(R.id.etBirthdate)
         etGender = findViewById(R.id.etGender)
 
+        val btnRegister: Button = findViewById(R.id.btnRegister)
+        val btnLogin: Button = findViewById(R.id.btnLogin)
 
         etBirthdate.setOnClickListener {
             showDatePicker()
@@ -35,6 +39,16 @@ class SignUp : AppCompatActivity() {
 
         etGender.setOnClickListener {
             showGenderSelector()
+        }
+
+        btnRegister.setOnClickListener {
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
+        }
+
+        btnLogin.setOnClickListener {
+            val intent = Intent(this, Login::class.java)
+            startActivity(intent)
         }
 
     }
