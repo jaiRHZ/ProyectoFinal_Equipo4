@@ -1,7 +1,51 @@
 <resources>
+
+    <string name="signup_title">Sign up to iThink</string>
+    <string name="signup_name">Name</string>
+    <string name="signup_email">Email</string>
+    <string name="signup_birthdate">Birthdate</string>
+    <string name="signup_gender">Gender</string>
+    <string name="signup_password">Password</string>
+    <string name="signup_confirm_password">Confirm Password</string>
+    <string name="signup_register_button">Register</string>
+    <string name="signup_login_button">Login</string>
+
+    <string name="filter_title">Filter</string>"
+    <string name="filter_tags">Tags</string>
+    <string name="filter_switch_my_reviews">My reviews</string>
+    <string name="filter_switch_explore_reviews">Explore reviews</string>
+    <string name="filter_button">Apply</string>
+    <string name="filter_tag_1">anime</string>
+    <string name="filter_tag_2">parody</string>
+    <string name="filter_tag_3">battle</string>
+    <string name="filter_tag_4">satire</string>
+    <string name="filter_tag_5">post apocalypse</string>
+    <string name="filter_tag_6">robot</string>
+    <string name="filter_tag_7">cyberpunk</string>
+    <string name="filter_tag_8">heist</string>
+
+    <string name="add_content_title">Add Content</string>
+    <string name="add_content_title_input">Title</string>
+    <string name="add_content_type">Type</string>
+    <string name="add_content_type_movie">Movie</string>
+    <string name="add_content_type_serie">Serie</string>
+    <string name="add_content_type_book">Book</string>
+    <string name="add_content_isbn">ISBN</string>
+    <string name="add_content_category">Category</string>
+    <string name="add_content_synopsis">Synopsis</string>
+    <string name="add_content_tags">Tags</string>
+    <string name="add_content_cover_image">Cover image</string>
+    <string name="add_content_review">Review</string>
+    <string name="add_content_rating">Rating</string>
+    <string name="add_content_share_review">Share review</string>
+    <string name="add_content_add_button">Add</string>
+    <string name="add_content_cancel_button">Cancel</string>
+
+
     <string name="app_name">iThink</string>
     <string name="login_title">Sign in to</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="login_button">Login</string>
+
 </resources>
