@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="titleSettings">Settings</string>
+    <string name="inputName_Settings">Name</string>
+    <string name="inputBirthDate_Settings">Birthdate</string>
+
+    <string name="selectGender_Settings">Gender</string>
+    <string name="btnSave_settings">Save</string>
+    <string name="btnChangePassword_settings">Change Password</string>
+    <string name="btnLogout_settings">Logout</string>
+</resources>
