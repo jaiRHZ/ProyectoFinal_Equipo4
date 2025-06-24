@@ -41,11 +41,4 @@
     <string name="add_content_add_button">Add</string>
     <string name="add_content_cancel_button">Cancel</string>
 
-
-    <string name="app_name">iThink</string>
-    <string name="login_title">Sign in to</string>
-    <string name="email">Email</string>
-    <string name="password">Password</string>
-    <string name="login_button">Login</string>
-
 </resources>
