@@ -77,10 +77,10 @@ class UserConfiguration : AppCompatActivity() {
     }
 
     private fun showGenderSelector() {
-        val genderOptions = arrayOf("Masculino", "Femenino", "Otro", "Prefiero no decir")
+        val genderOptions = arrayOf("Male", "Female", "Other", "Do Not Specify")
 
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Seleccionar género")
+        builder.setTitle("Select Gender")
         builder.setItems(genderOptions) { _, which ->
             genderSelector.setText(genderOptions[which])
         }
