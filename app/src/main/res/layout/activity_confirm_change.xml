@@ -24,10 +24,10 @@
 
         <TextView
             android:layout_marginLeft="20dp"
-            android:layout_width="300dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/inter_18pt_bold"
-            android:textSize="32sp"
+            android:textSize="25sp"
             android:text="Change Password" />
 
     </LinearLayout>
@@ -40,6 +40,7 @@
         android:background="@color/white"
         android:textColor="@color/black"
         android:hint="   Code"
+        android:textColorHint="@color/subtituloGris"
         android:layout_marginTop="50dp"
         android:layout_marginBottom="65dp"
         />

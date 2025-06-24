@@ -20,20 +20,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/login_title"
-            android:textSize="40sp"
+            android:textSize="38sp"
             android:fontFamily="@font/inter_18pt_bold"
-            android:layout_marginLeft="40dp"
+            android:layout_marginLeft="35dp"
             />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
-            android:textSize="40sp"
+            android:textSize="38sp"
             android:fontFamily="@font/inter_18pt_bold"
             android:textColor="@color/tituloRojo"
-            android:layout_marginLeft="20dp"
-            android:layout_gravity="end"
+            android:layout_marginLeft="10dp"
             />
     </LinearLayout>
 
@@ -44,14 +43,14 @@
         android:textSize="32sp"
         android:textColor="@color/subtituloGris"
         android:paddingTop="15dp"
-        android:layout_marginLeft="40dp"
+        android:layout_marginLeft="35dp"
         />
 
     <EditText
         android:id="@+id/login_email"
-        android:layout_width="330dp"
+        android:layout_width="300dp"
         android:layout_height="40dp"
-        android:layout_marginLeft="40dp"
+        android:layout_marginLeft="35dp"
         android:background="@color/white"
         android:textColor="@color/black"
         android:layout_marginBottom="40dp"
@@ -63,14 +62,14 @@
         android:text="@string/password"
         android:textSize="32sp"
         android:textColor="@color/subtituloGris"
-        android:layout_marginLeft="40dp"
+        android:layout_marginLeft="35dp"
         />
 
     <EditText
         android:id="@+id/login_password"
-        android:layout_width="330dp"
+        android:layout_width="300dp"
         android:layout_height="40dp"
-        android:layout_marginLeft="40dp"
+        android:layout_marginLeft="35dp"
         android:background="@color/white"
         android:textColor="@color/black"
         android:layout_marginBottom="65dp"
@@ -90,6 +89,7 @@
         android:layout_marginBottom="20dp"/>
 
     <Button
+        android:id="@+id/login_button_signup"
         android:layout_width="125dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -110,6 +110,7 @@
         />
 
     <Button
+        android:id="@+id/login_button_forgot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

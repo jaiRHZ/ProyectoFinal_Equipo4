@@ -149,6 +149,8 @@
         android:textColor="@color/white"
         android:textSize="16sp"
         android:padding="8dp"
+        app:trackTint="@color/tituloRojo"
+        app:thumbTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chipGroupTags" />
@@ -164,6 +166,8 @@
         android:textColor="@color/white"
         android:textSize="16sp"
         android:padding="8dp"
+        app:trackTint="@color/tituloRojo"
+        app:thumbTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/switchMyReviews" />
@@ -171,7 +175,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/boton"
+        android:background="@drawable/round_button"
         android:text="@string/filter_button"
         android:textColor="@color/white"
         android:layout_marginTop="128dp"
