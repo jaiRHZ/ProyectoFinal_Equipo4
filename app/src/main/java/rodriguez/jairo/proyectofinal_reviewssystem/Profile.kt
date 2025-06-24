@@ -21,13 +21,13 @@ class Profile : AppCompatActivity() {
 
         //Falta conectar a pantalla Home
         findViewById<ImageView>(R.id.backHome).setOnClickListener {
-            val intent = Intent(this, Login::class.java)
+            val intent = Intent(this, Home::class.java)
             startActivity(intent)
         }
 
         //Falta conectar a pantalla settings
         findViewById<ImageView>(R.id.profile_settings).setOnClickListener {
-            val intent = Intent(this, Login::class.java)
+            val intent = Intent(this, UserConfiguration::class.java)
             startActivity(intent)
         }
 
