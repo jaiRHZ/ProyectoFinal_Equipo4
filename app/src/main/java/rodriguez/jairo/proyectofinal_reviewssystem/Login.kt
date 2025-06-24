@@ -1,20 +1,53 @@
 package rodriguez.jairo.proyectofinal_reviewssystem
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.util.PatternsCompat
 
 class Login : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_login)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        val loginButton: Button = findViewById(R.id.login_button)
+        val signupButton: Button = findViewById(R.id.login_button_signup)
+        val forgotButton: Button = findViewById(R.id.login_button_forgot)
+        val emailEditText: EditText = findViewById(R.id.login_email)
+
+        loginButton.setOnClickListener {
+            val email = emailEditText.text.toString().trim()
+
+            when {
+                email.isEmpty() -> {
+                    emailEditText.error = "Por favor ingresa tu email"
+                    return@setOnClickListener
+                }
+                !isEmailValid(email) -> {
+                    emailEditText.error = "Ingresa un email valido"
+                    return@setOnClickListener
+                }
+                else -> {
+                    // Email válido, proceder al login
+                    val intent = Intent(this, Profile::class.java)
+                    startActivity(intent)
+                }
+            }
         }
+
+        signupButton.setOnClickListener {
+            startActivity(Intent(this, SignUp::class.java))
+        }
+
+        forgotButton.setOnClickListener {
+            startActivity(Intent(this, ConfirmChange::class.java))
+        }
+    }
+
+    private fun isEmailValid(email: String): Boolean {
+        return PatternsCompat.EMAIL_ADDRESS.matcher(email).matches()
     }
 }
