@@ -32,7 +32,7 @@ class Login : AppCompatActivity() {
                 }
                 else -> {
                     // Email válido, proceder al login
-                    val intent = Intent(this, Profile::class.java)
+                    val intent = Intent(this, Home::class.java)
                     startActivity(intent)
                 }
             }
