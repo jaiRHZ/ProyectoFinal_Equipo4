@@ -12,11 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import rodriguez.jairo.proyectofinal_reviewssystem.databinding.ActivityHomeBinding
+
 
 class Home : AppCompatActivity() {
 
@@ -34,6 +30,10 @@ class Home : AppCompatActivity() {
         seriesAdapter = PeliculaAdapter(this, series)
 
         var gridPelis: GridView = findViewById(R.id.movies_catalog)
+        var home: ImageView = findViewById(R.id.profile_home)
+        home.setOnClickListener{
+            var intent: Intent = Intent(this, UserConfiguration::class.java)
+        }
 
         gridPelis.adapter = adapter
 
