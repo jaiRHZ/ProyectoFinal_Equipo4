@@ -29,7 +29,8 @@
             android:layout_gravity="center"
             android:layout_marginLeft="115dp"
             android:padding="10dp"
-            android:text="@string/titleSettings" />
+            android:text="@string/titleSettings"
+            />
 
     </LinearLayout>
 
@@ -43,6 +44,7 @@
 
     <EditText
         android:hint="@string/inputName_Settings"
+        android:textColorHint="@color/subtituloGris"
         android:textColor="@color/black"
         android:id="@+id/input_settings_name"
         android:layout_width="300dp"
@@ -57,6 +59,7 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:background="@drawable/edittext_background"
+        android:textColorHint="@color/subtituloGris"
         android:clickable="true"
         android:cursorVisible="false"
         android:focusable="false"
@@ -75,6 +78,7 @@
         android:layout_gravity="center"
         android:layout_margin="30dp"
         android:background="@drawable/edittext_background"
+        android:textColorHint="@color/subtituloGris"
         android:clickable="true"
         android:cursorVisible="false"
         android:focusable="false"
@@ -92,14 +96,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/round_button"
-        android:backgroundTint="@color/boton"/>
+        android:backgroundTint="@color/boton"
+        android:textAllCaps="false"/>
     <Button
         android:id="@+id/btnChangePassword_Settings"
         android:text="@string/btnChangePassword_settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@drawable/round_button"
+        android:background="@drawable/round_grey_button"
+        android:textAllCaps="false"
         android:layout_margin="20dp"
         />
 
@@ -107,12 +113,21 @@
         android:id="@+id/btnLogout_settings"
         android:text="@string/btnLogout_settings"
         android:textSize="20sp"
-        android:textColor="@color/boton"
+        android:textColor="@color/subtituloGris"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="40dp"
         style="@style/Widget.Material3.Button.IconButton.Outlined"
+        />
+
+    <View
+        android:layout_width="100dp"
+        android:layout_height="2dp"
+        android:background="@color/white"
+        android:layout_marginHorizontal="15dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
         />
 
 

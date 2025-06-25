@@ -9,9 +9,10 @@
     tools:context=".Login">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
+        android:layout_gravity="center"
         android:paddingBottom="15dp"
         android:orientation="horizontal">
 
@@ -21,8 +22,8 @@
             android:layout_height="wrap_content"
             android:text="@string/login_title"
             android:textSize="38sp"
+            android:textColor="@color/white"
             android:fontFamily="@font/inter_18pt_bold"
-            android:layout_marginLeft="35dp"
             />
 
         <TextView
@@ -43,14 +44,14 @@
         android:textSize="32sp"
         android:textColor="@color/subtituloGris"
         android:paddingTop="15dp"
-        android:layout_marginLeft="35dp"
+        android:layout_marginLeft="30dp"
         />
 
     <EditText
         android:id="@+id/login_email"
         android:layout_width="300dp"
         android:layout_height="40dp"
-        android:layout_marginLeft="35dp"
+        android:layout_gravity="center"
         android:background="@color/white"
         android:textColor="@color/black"
         android:layout_marginBottom="40dp"
@@ -62,18 +63,41 @@
         android:text="@string/password"
         android:textSize="32sp"
         android:textColor="@color/subtituloGris"
-        android:layout_marginLeft="35dp"
+        android:layout_marginLeft="30dp"
         />
 
     <EditText
         android:id="@+id/login_password"
         android:layout_width="300dp"
         android:layout_height="40dp"
-        android:layout_marginLeft="35dp"
+        android:layout_gravity="center"
         android:background="@color/white"
         android:textColor="@color/black"
-        android:layout_marginBottom="65dp"
+
         android:inputType="textPassword"
+        />
+
+    <Button
+        android:id="@+id/login_button_forgot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:fontFamily="@font/inter_18pt_regular"
+        android:text="Forgot my password"
+        android:textColor="@color/subtituloGris"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:background="?android:attr/selectableItemBackground"
+        android:layout_marginRight="50dp"
+        />
+
+    <View
+        android:layout_width="200dp"
+        android:layout_height="2dp"
+        android:background="@color/subtituloGris"
+        android:layout_marginHorizontal="25dp"
+        android:layout_gravity="end"
+        android:layout_marginBottom="65dp"
         />
 
     <Button
@@ -109,24 +133,6 @@
         android:layout_marginBottom="10dp"
         />
 
-    <Button
-        android:id="@+id/login_button_forgot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:fontFamily="@font/inter_18pt_regular"
-        android:text="Forgot my password"
-        android:textAllCaps="false"
-        android:textSize="16sp"
-        android:background="?android:attr/selectableItemBackground"
-        />
 
-    <View
-        android:layout_width="200dp"
-        android:layout_height="2dp"
-        android:background="@color/white"
-        android:layout_marginHorizontal="15dp"
-        android:layout_gravity="center"
-        />
 
 </LinearLayout>

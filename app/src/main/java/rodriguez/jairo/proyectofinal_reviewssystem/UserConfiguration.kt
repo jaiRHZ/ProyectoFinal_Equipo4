@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Spinner
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -19,7 +20,7 @@ class UserConfiguration : AppCompatActivity() {
     private lateinit var usernameSettings: EditText
     private lateinit var birthdayPicker: EditText
     private lateinit var genderSelector: EditText
-
+    private lateinit var back: ImageView
     private lateinit var btnSave_setting: Button
     private lateinit var btnChangePass_setting: Button
     private lateinit var btnLogout_setting: Button
@@ -36,11 +37,16 @@ class UserConfiguration : AppCompatActivity() {
         usernameSettings = findViewById(R.id.input_settings_name)
         birthdayPicker = findViewById(R.id.birthdatePicker_settings)
         genderSelector = findViewById(R.id.genderSelector_settings)
-
+        back = findViewById(R.id.backHome)
         btnSave_setting = findViewById(R.id.btnSave_Settings)
         btnChangePass_setting =findViewById(R.id.btnChangePassword_Settings)
         btnLogout_setting = findViewById(R.id.btnLogout_settings)
 
+
+        back.setOnClickListener{
+            val intent = Intent(this, Profile::class.java)
+            startActivity(intent)
+        }
 
         birthdayPicker.setOnClickListener{
             showDatePicker()
@@ -55,7 +61,7 @@ class UserConfiguration : AppCompatActivity() {
             startActivity(intent)
         }
         btnChangePass_setting.setOnClickListener {
-            val intent = Intent(this, ConfirmChange::class.java)
+            val intent = Intent(this, ChangePassword::class.java)
             startActivity(intent)
         }
 
