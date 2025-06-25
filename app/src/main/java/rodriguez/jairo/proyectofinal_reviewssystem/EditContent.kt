@@ -21,27 +21,24 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.switchmaterial.SwitchMaterial
 
-class AddContent : AppCompatActivity() {
+class EditContent : AppCompatActivity() {
 
     private lateinit var etTitle: EditText
-    private lateinit var switchOption1: SwitchCompat
-    private lateinit var switchOption2: SwitchCompat
-    private lateinit var switchOption3: SwitchCompat
+    private lateinit var switchOption1: SwitchMaterial
+    private lateinit var switchOption2: SwitchMaterial
+    private lateinit var switchOption3: SwitchMaterial
     private lateinit var textViewISBN: TextView
     private lateinit var etISBN: EditText
     private lateinit var etCategory: EditText
     private lateinit var etSynopsis: EditText
-    private lateinit var etReview: EditText
     private lateinit var chipGroupTags: ChipGroup
     private lateinit var ivCoverImage: ImageView
-    private lateinit var switchShareReviews: SwitchCompat
-    private lateinit var btnAdd: Button
+    private lateinit var btnApplyChanges: Button
     private lateinit var btnCancel: Button
 
     private val selectedTags = mutableListOf<String>()
-    private val stars = mutableListOf<ImageView>()
-    private var selectedRating = 0
     private var selectedImageUri: Uri? = null
 
     private val imagePickerLauncher = registerForActivityResult(
@@ -56,7 +53,7 @@ class AddContent : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_add_content)
+        setContentView(R.layout.activity_edit_content)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -65,6 +62,7 @@ class AddContent : AppCompatActivity() {
 
         initializeViews()
         setupClickListeners()
+        loadExistingData() // Cargar datos existentes para edición
     }
 
     private fun initializeViews() {
@@ -76,35 +74,29 @@ class AddContent : AppCompatActivity() {
         etISBN = findViewById(R.id.etISBN)
         etCategory = findViewById(R.id.etCategory)
         etSynopsis = findViewById(R.id.etSynopsis)
-        etReview = findViewById(R.id.etReview)
         chipGroupTags = findViewById(R.id.chipGroupTags)
         ivCoverImage = findViewById(R.id.ivCoverImage)
-        switchShareReviews = findViewById(R.id.switchShareReviews)
-        btnAdd = findViewById(R.id.btnAdd)
+        btnApplyChanges = findViewById(R.id.btnApplyChanges)
         btnCancel = findViewById(R.id.btnCancel)
+    }
 
-        // Inicializar estrellas
-        stars.add(findViewById(R.id.star1))
-        stars.add(findViewById(R.id.star2))
-        stars.add(findViewById(R.id.star3))
-        stars.add(findViewById(R.id.star4))
-        stars.add(findViewById(R.id.star5))
+    private fun loadExistingData() {
+        // Aquí se cargarian los datos de existentes para edición
+
     }
 
     private fun setupClickListeners() {
         setupExclusiveSwitches()
         setupCategorySelector()
         setupTagsListener()
-        setupStarRating()
         setupImagePicker()
         setupButtonListeners()
-        setupSwitchListener()
     }
 
     private fun setupButtonListeners() {
-        btnAdd.setOnClickListener {
+        btnApplyChanges.setOnClickListener {
             if (validateForm()) {
-                addContent()
+                applyChanges()
                 val intent = Intent(this, Home::class.java)
                 startActivity(intent)
                 finish()
@@ -113,10 +105,13 @@ class AddContent : AppCompatActivity() {
 
         btnCancel.setOnClickListener {
             showCancelConfirmation()
+
             val intent = Intent(this, Home::class.java)
             startActivity(intent)
             finish()
         }
+
+
     }
 
 
@@ -148,22 +143,12 @@ class AddContent : AppCompatActivity() {
             isValid = false
         }
 
-        // Validar tags (mejorado con límite máximo)
+        // Validar tags
         if (!validateTags()) {
             isValid = false
         }
 
-        // Validar reseña
-        if (!validateReview()) {
-            isValid = false
-        }
-
-        // Validar calificación
-        if (!validateRating()) {
-            isValid = false
-        }
-
-        // Validar imagen (opcional para AddContent, pero con aviso)
+        // Validar imagen (opcional para EditContent con aviso amigable)
         validateImage()
 
         return isValid
@@ -281,46 +266,11 @@ class AddContent : AppCompatActivity() {
         }
     }
 
-    private fun validateReview(): Boolean {
-        val review = etReview.text.toString().trim()
 
-        return when {
-            review.isEmpty() -> {
-                etReview.error = "La reseña es requerida"
-                etReview.requestFocus()
-                false
-            }
-            review.length < 10 -> {
-                etReview.error = "La reseña debe tener al menos 10 caracteres"
-                etReview.requestFocus()
-                false
-            }
-            review.length > 1000 -> {
-                etReview.error = "La reseña no puede exceder 1000 caracteres"
-                etReview.requestFocus()
-                false
-            }
-            else -> {
-                etReview.error = null
-                true
-            }
-        }
-    }
-
-    private fun validateRating(): Boolean {
-        return if (selectedRating == 0) {
-            showToast("Selecciona una calificación (1-5 estrellas)")
-            false
-        } else {
-            true
-        }
-    }
-
-    // NUEVO: Validación opcional de imagen con aviso amigable
     private fun validateImage(): Boolean {
         return if (selectedImageUri == null) {
-            showToast("Recomendamos agregar una imagen de portada")
-            true // No bloquea el guardado, solo avisa
+            showToast("Recomendamos mantener o actualizar la imagen de portada")
+            true // No bloquea el guardado en edición, solo avisa
         } else {
             true
         }
@@ -360,7 +310,7 @@ class AddContent : AppCompatActivity() {
         return sum % 10 == 0
     }
 
-    private fun addContent() {
+    private fun applyChanges() {
         val title = etTitle.text.toString().trim()
         val contentType = when {
             switchOption1.isChecked -> "Película"
@@ -371,30 +321,25 @@ class AddContent : AppCompatActivity() {
         val isbn = if (switchOption3.isChecked) etISBN.text.toString().trim() else ""
         val category = etCategory.text.toString().trim()
         val synopsis = etSynopsis.text.toString().trim()
-        val review = etReview.text.toString().trim()
-        val shareReviews = switchShareReviews.isChecked
 
-        // Mostrar confirmación antes de guardar
+        // Mostrar confirmación antes de guardar cambios
         AlertDialog.Builder(this)
-            .setTitle("Confirmar adición")
-            .setMessage("¿Está seguro de que desea agregar este contenido?")
+            .setTitle("Confirmar cambios")
+            .setMessage("¿Está seguro de que desea aplicar estos cambios?")
             .setPositiveButton("Sí") { _, _ ->
-                // Lógica para guardar el contenido
-                Log.d("AddContent", """
-                    Contenido agregado:
+                // Lógica para guardar los cambios
+                Log.d("EditContent", """
+                    Cambios aplicados:
                     Título: $title
                     Tipo: $contentType
                     ISBN: $isbn
                     Categoría: $category
                     Sinopsis: $synopsis
                     Tags: $selectedTags
-                    Reseña: $review
-                    Calificación: $selectedRating estrellas
-                    Compartir reseñas: $shareReviews
-                    Imagen: ${selectedImageUri?.toString() ?: "No seleccionada"}
+                    Imagen: ${selectedImageUri?.toString() ?: "No modificada"}
                 """.trimIndent())
 
-                showToast("¡Contenido agregado exitosamente!")
+                showToast("¡Cambios aplicados exitosamente!")
 
                 // Simular guardado y cerrar actividad después de un breve delay
                 Handler(Looper.getMainLooper()).postDelayed({
@@ -412,7 +357,7 @@ class AddContent : AppCompatActivity() {
         if (hasUnsavedChanges()) {
             AlertDialog.Builder(this)
                 .setTitle("Cambios sin guardar")
-                .setMessage("Tiene información sin guardar. ¿Está seguro de que desea salir?")
+                .setMessage("Tiene cambios sin guardar. ¿Está seguro de que desea salir?")
                 .setPositiveButton("Salir sin guardar") { _, _ ->
                     finish()
                 }
@@ -421,7 +366,7 @@ class AddContent : AppCompatActivity() {
                 }
                 .setNeutralButton("Guardar y salir") { _, _ ->
                     if (validateForm()) {
-                        addContent()
+                        applyChanges()
                     }
                 }
                 .show()
@@ -431,24 +376,23 @@ class AddContent : AppCompatActivity() {
     }
 
     private fun hasUnsavedChanges(): Boolean {
+
         return etTitle.text.toString().trim().isNotEmpty() ||
                 etSynopsis.text.toString().trim().isNotEmpty() ||
-                etReview.text.toString().trim().isNotEmpty() ||
                 etCategory.text.toString().trim().isNotEmpty() ||
                 etISBN.text.toString().trim().isNotEmpty() ||
                 selectedTags.isNotEmpty() ||
                 switchOption1.isChecked ||
                 switchOption2.isChecked ||
                 switchOption3.isChecked ||
-                selectedImageUri != null ||
-                selectedRating > 0
+                selectedImageUri != null
     }
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    // MEJORADO: Control de tags con límite máximo
+
     private fun setupTagsListener() {
         for (i in 0 until chipGroupTags.childCount) {
             val chip = chipGroupTags.getChildAt(i) as Chip
@@ -533,34 +477,9 @@ class AddContent : AppCompatActivity() {
             .show()
     }
 
-    private fun setupStarRating() {
-        stars.forEachIndexed { index, star ->
-            star.setOnClickListener {
-                selectedRating = index + 1
-                updateStarDisplay()
-            }
-        }
-    }
-
-    private fun updateStarDisplay() {
-        stars.forEachIndexed { index, star ->
-            if (index < selectedRating) {
-                star.setImageResource(android.R.drawable.btn_star_big_on)
-            } else {
-                star.setImageResource(android.R.drawable.btn_star_big_off)
-            }
-        }
-    }
-
     private fun setupImagePicker() {
         ivCoverImage.setOnClickListener {
             imagePickerLauncher.launch("image/*")
-        }
-    }
-
-    private fun setupSwitchListener() {
-        switchShareReviews.setOnCheckedChangeListener { _, isChecked ->
-            Log.d("ShareSwitch", "Share reviews checked: $isChecked")
         }
     }
 

@@ -12,14 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="24dp"
-        tools:context=".AddContent">
+        tools:context=".EditContent">
 
         <TextView
             android:id="@+id/textView10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="@string/add_content_title"
+            android:text="@string/edit_content_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -44,8 +44,8 @@
         <EditText
             android:id="@+id/etTitle"
             android:layout_width="300dp"
-            android:textColor="@color/black"
             android:layout_height="wrap_content"
+            android:textColor="@color/black"
             android:background="@drawable/edittext_background"
             android:drawablePadding="8dp"
             android:padding="8dp"
@@ -181,8 +181,8 @@
         <EditText
             android:id="@+id/etSynopsis"
             android:layout_width="300dp"
-            android:layout_height="wrap_content"
             android:textColor="@color/black"
+            android:layout_height="wrap_content"
             android:background="@drawable/edittext_background"
             android:drawablePadding="8dp"
             android:padding="8dp"
@@ -336,134 +336,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView16" />
 
-        <TextView
-            android:id="@+id/textView17"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:textColor="@color/subtituloGris"
-            android:textSize="24sp"
-            android:padding="8dp"
-            android:text="@string/add_content_review"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.15"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ivCoverImage" />
-
-        <EditText
-            android:id="@+id/etReview"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/edittext_background"
-            android:drawablePadding="8dp"
-            android:textColor="@color/black"
-            android:padding="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView17" />
-
-        <TextView
-            android:id="@+id/textView18"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/subtituloGris"
-            android:textSize="24sp"
-            android:padding="8dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/add_content_rating"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.15"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etReview" />
-
-        <LinearLayout
-            android:id="@+id/layoutStars"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView18">
-
-            <ImageView
-                android:id="@+id/star1"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:src="@android:drawable/btn_star_big_off"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground" />
-
-            <ImageView
-                android:id="@+id/star2"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:src="@android:drawable/btn_star_big_off"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground" />
-
-            <ImageView
-                android:id="@+id/star3"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:src="@android:drawable/btn_star_big_off"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground" />
-
-            <ImageView
-                android:id="@+id/star4"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginEnd="8dp"
-                android:src="@android:drawable/btn_star_big_off"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground" />
-
-            <ImageView
-                android:id="@+id/star5"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@android:drawable/btn_star_big_off"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?android:attr/selectableItemBackground" />
-
-        </LinearLayout>
-
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switchShareReviews"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="32dp"
-            android:text="@string/add_content_share_review"
-            android:textColor="@color/subtituloGris"
-            android:textSize="24sp"
-            android:padding="8dp"
-            app:trackTint="@color/tituloRojo"
-            app:thumbTint="@color/white"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layoutStars" />
-
         <Button
-            android:id="@+id/btnAdd"
+            android:id="@+id/btnApplyChanges"
             android:background="@color/boton"
             android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="@string/add_content_add_button"
+            android:text="@string/edit_content_apply_changes"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/switchShareReviews" />
+            app:layout_constraintTop_toBottomOf="@+id/ivCoverImage" />
 
         <Button
             android:id="@+id/btnCancel"
@@ -475,7 +358,7 @@
             android:layout_marginTop="24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnAdd" />
+            app:layout_constraintTop_toBottomOf="@+id/btnApplyChanges" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

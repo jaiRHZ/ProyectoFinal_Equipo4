@@ -83,4 +83,7 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
 
+    <string name="edit_content_title">Edit Content</string>
+    <string name="edit_content_apply_changes">Apply changes</string>
+
 </resources>

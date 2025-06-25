@@ -20,6 +20,9 @@
             android:exported="false"
             android:theme="@style/Theme.ProyectoFinal_ReviewsSystem" />
         <activity
+            android:name=".EditContent"
+            android:exported="false" />
+        <activity
             android:name=".Profile"
             android:exported="false" />
         <activity
@@ -39,6 +42,8 @@
             android:exported="false" />
         <activity
             android:name=".Login"
+            android:exported="false" />
+        <activity android:name=".UserConfiguration"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

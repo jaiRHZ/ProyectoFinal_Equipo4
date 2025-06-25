@@ -11,13 +11,8 @@ import android.widget.Button
 import android.widget.GridView
 import android.widget.ImageView
 import android.widget.TextView
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import rodriguez.jairo.proyectofinal_reviewssystem.databinding.ActivityHomeBinding
+
 
 class Home : AppCompatActivity() {
     
@@ -36,6 +31,11 @@ class Home : AppCompatActivity() {
         seriesAdapter = PeliculaAdapter(this, series)
 
         var gridPelis: GridView = findViewById(R.id.movies_catalog)
+        val home: ImageView = findViewById(R.id.profile_home)
+        home.setOnClickListener{
+            val intent: Intent = Intent(this, Profile::class.java)
+            startActivity(intent)
+        }
 
         gridPelis.adapter = adapter
 
@@ -72,10 +72,11 @@ class Home : AppCompatActivity() {
             var vista = inflator.inflate(R.layout.cell_movie, null)
             var image: ImageView = vista.findViewById(R.id.image_movie_cell)
             var title: TextView = vista.findViewById(R.id.movie_title_cell)
+            var stars: ImageView = vista.findViewById(R.id.stars_home)
 
             image.setImageResource(pelicula.image)
             title.setText(pelicula.title)
-
+            stars.setImageResource(pelicula.stars)
 
             image.setOnClickListener {
                 var intento = Intent(contexto, Profile::class.java)
