@@ -2,13 +2,21 @@ package rodriguez.jairo.proyectofinal_reviewssystem
 
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.view.ContextThemeWrapper
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.DatePicker
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import java.util.Calendar
@@ -159,11 +167,11 @@ class SignUp : AppCompatActivity() {
 
         return when {
             birthdate.isEmpty() -> {
-                showToast("Selecciona tu fecha de nacimiento")
+                showStyledToast("Selecciona tu fecha de nacimiento")
                 false
             }
             !isValidAge(birthdate) -> {
-                showToast("Debes ser mayor de 13 años para registrarte")
+                showStyledToast("Debes ser mayor de 13 años para registrarte")
                 false
             }
             else -> true
@@ -175,7 +183,7 @@ class SignUp : AppCompatActivity() {
 
         return when {
             gender.isEmpty() -> {
-                showToast("Selecciona tu género")
+                showStyledToast("Selecciona tu género")
                 false
             }
             else -> true
@@ -191,23 +199,8 @@ class SignUp : AppCompatActivity() {
                 etPassword.requestFocus()
                 false
             }
-            password.length < 6 -> {
-                etPassword.error = "La contraseña debe tener al menos 6 caracteres"
-                etPassword.requestFocus()
-                false
-            }
-            !password.matches(Regex(".*[A-Z].*")) -> {
-                etPassword.error = "La contraseña debe contener al menos una mayúscula"
-                etPassword.requestFocus()
-                false
-            }
-            !password.matches(Regex(".*[a-z].*")) -> {
-                etPassword.error = "La contraseña debe contener al menos una minúscula"
-                etPassword.requestFocus()
-                false
-            }
-            !password.matches(Regex(".*\\d.*")) -> {
-                etPassword.error = "La contraseña debe contener al menos un número"
+            password.length < 8 -> {
+                etPassword.error = "La contraseña debe tener al menos 8 caracteres"
                 etPassword.requestFocus()
                 false
             }
@@ -268,7 +261,7 @@ class SignUp : AppCompatActivity() {
 
     private fun registerUser() {
         // Mostrar mensaje de éxito
-        showToast("¡Registro exitoso!")
+        showStyledToast("¡Registro exitoso!")
 
         // Proceder a la pantalla de login
         val intent = Intent(this, Login::class.java)
@@ -276,8 +269,18 @@ class SignUp : AppCompatActivity() {
         finish() // Opcional: cerrar la actividad actual
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun showStyledToast(message: String) {
+        val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
+        val view = toast.view
+
+        // Personalizar el Toast para que coincida con la paleta de colores
+        view?.apply {
+            background = ContextCompat.getDrawable(this@SignUp, R.drawable.toast_background)
+            val textView = findViewById<TextView>(android.R.id.message)
+            textView?.setTextColor(ContextCompat.getColor(this@SignUp, R.color.white))
+        }
+
+        toast.show()
     }
 
     private fun showDatePicker() {
@@ -286,8 +289,12 @@ class SignUp : AppCompatActivity() {
         val month = calendar.get(Calendar.MONTH)
         val day = calendar.get(Calendar.DAY_OF_MONTH)
 
+        // Crear un contexto con tema personalizado para el DatePicker
+        val themedContext = ContextThemeWrapper(this, R.style.CustomDatePickerTheme)
+
         val datePickerDialog = DatePickerDialog(
-            this,
+            themedContext,
+            R.style.CustomDatePickerTheme,
             { _, selectedYear, selectedMonth, selectedDay ->
                 val selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
                 etBirthdate.setText(selectedDate)
@@ -302,17 +309,102 @@ class SignUp : AppCompatActivity() {
         maxDate.add(Calendar.YEAR, -13)
         datePickerDialog.datePicker.maxDate = maxDate.timeInMillis
 
+        // Personalizar los botones y colores del DatePicker
+        datePickerDialog.setOnShowListener {
+            val positiveButton = datePickerDialog.getButton(DialogInterface.BUTTON_POSITIVE)
+            val negativeButton = datePickerDialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+
+            positiveButton?.setTextColor(ContextCompat.getColor(this, R.color.boton))
+            negativeButton?.setTextColor(ContextCompat.getColor(this, R.color.subtituloGris))
+
+            // Personalizar el fondo del diálogo
+            datePickerDialog.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
+
+            // Forzar colores de texto en el DatePicker
+            try {
+                val datePicker = datePickerDialog.datePicker
+                setDatePickerTextColors(datePicker)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         datePickerDialog.show()
+    }
+
+    private fun setDatePickerTextColors(datePicker: DatePicker) {
+        try {
+            // Cambiar colores de texto recursivamente
+            setViewTextColors(datePicker)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun setViewTextColors(view: View) {
+        try {
+            when (view) {
+                is TextView -> {
+                    view.setTextColor(ContextCompat.getColor(this, R.color.white))
+                }
+                is EditText -> {
+                    view.setTextColor(ContextCompat.getColor(this, R.color.white))
+                }
+                is ViewGroup -> {
+                    for (i in 0 until view.childCount) {
+                        setViewTextColors(view.getChildAt(i))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun showGenderSelector() {
         val genderOptions = arrayOf("Masculino", "Femenino", "Otro", "Prefiero no decir")
 
-        val builder = AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
         builder.setTitle("Seleccionar género")
-        builder.setItems(genderOptions) { _, which ->
-            etGender.setText(genderOptions[which])
+
+        // Crear un adaptador personalizado para las opciones
+        val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, genderOptions) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent)
+                val textView = view.findViewById<TextView>(android.R.id.text1)
+                textView.setTextColor(ContextCompat.getColor(this@SignUp, R.color.white))
+                textView.setBackgroundColor(ContextCompat.getColor(this@SignUp, android.R.color.transparent))
+                textView.setPadding(32, 32, 32, 32)
+                return view
+            }
         }
-        builder.show()
+
+        builder.setAdapter(adapter) { dialog, which ->
+            etGender.setText(genderOptions[which])
+            dialog.dismiss()
+        }
+
+        val alertDialog = builder.create()
+
+        // Personalizar después de mostrar el diálogo
+        alertDialog.setOnShowListener {
+            // Personalizar el título
+            val titleId = resources.getIdentifier("alertTitle", "id", "android")
+            if (titleId > 0) {
+                val titleView = alertDialog.findViewById<TextView>(titleId)
+                titleView?.setTextColor(ContextCompat.getColor(this, R.color.white))
+                titleView?.textSize = 18f
+            }
+
+            // Personalizar el fondo del diálogo
+            alertDialog.window?.setBackgroundDrawableResource(R.drawable.dialog_background)
+
+            // Personalizar la lista
+            val listView = alertDialog.listView
+            listView?.divider = ContextCompat.getDrawable(this, R.drawable.divider_line)
+            listView?.dividerHeight = 1
+        }
+
+        alertDialog.show()
     }
 }

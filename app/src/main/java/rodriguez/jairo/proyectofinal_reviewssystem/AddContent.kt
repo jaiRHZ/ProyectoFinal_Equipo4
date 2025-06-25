@@ -1,6 +1,7 @@
 package rodriguez.jairo.proyectofinal_reviewssystem
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -17,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.chip.Chip
@@ -105,20 +107,13 @@ class AddContent : AppCompatActivity() {
         btnAdd.setOnClickListener {
             if (validateForm()) {
                 addContent()
-                val intent = Intent(this, Home::class.java)
-                startActivity(intent)
-                finish()
             }
         }
 
         btnCancel.setOnClickListener {
             showCancelConfirmation()
-            val intent = Intent(this, Home::class.java)
-            startActivity(intent)
-            finish()
         }
     }
-
 
     private fun validateForm(): Boolean {
         var isValid = true
@@ -199,7 +194,7 @@ class AddContent : AppCompatActivity() {
         val hasSelection = switchOption1.isChecked || switchOption2.isChecked || switchOption3.isChecked
 
         return if (!hasSelection) {
-            showToast("Selecciona un tipo de contenido (Película, Serie o Libro)")
+            showCustomToast("Selecciona un tipo de contenido (Película, Serie o Libro)")
             false
         } else {
             true
@@ -232,7 +227,7 @@ class AddContent : AppCompatActivity() {
 
         return when {
             category.isEmpty() -> {
-                showToast("Selecciona una categoría")
+                showCustomToast("Selecciona una categoría")
                 etCategory.requestFocus()
                 false
             }
@@ -266,15 +261,14 @@ class AddContent : AppCompatActivity() {
         }
     }
 
-
     private fun validateTags(): Boolean {
         return when {
             selectedTags.isEmpty() -> {
-                showToast("Selecciona al menos un tag")
+                showCustomToast("Selecciona al menos un tag")
                 false
             }
             selectedTags.size > 5 -> {
-                showToast("No puedes seleccionar más de 5 tags")
+                showCustomToast("No puedes seleccionar más de 5 tags")
                 false
             }
             else -> true
@@ -309,7 +303,7 @@ class AddContent : AppCompatActivity() {
 
     private fun validateRating(): Boolean {
         return if (selectedRating == 0) {
-            showToast("Selecciona una calificación (1-5 estrellas)")
+            showCustomToast("Selecciona una calificación (1-5 estrellas)")
             false
         } else {
             true
@@ -319,7 +313,7 @@ class AddContent : AppCompatActivity() {
     // NUEVO: Validación opcional de imagen con aviso amigable
     private fun validateImage(): Boolean {
         return if (selectedImageUri == null) {
-            showToast("Recomendamos agregar una imagen de portada")
+            showCustomToast("Recomendamos agregar una imagen de portada")
             true // No bloquea el guardado, solo avisa
         } else {
             true
@@ -374,60 +368,112 @@ class AddContent : AppCompatActivity() {
         val review = etReview.text.toString().trim()
         val shareReviews = switchShareReviews.isChecked
 
-        // Mostrar confirmación antes de guardar
-        AlertDialog.Builder(this)
+        // Crear diálogo con tema personalizado
+        AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle("Confirmar adición")
             .setMessage("¿Está seguro de que desea agregar este contenido?")
             .setPositiveButton("Sí") { _, _ ->
                 // Lógica para guardar el contenido
                 Log.d("AddContent", """
-                    Contenido agregado:
-                    Título: $title
-                    Tipo: $contentType
-                    ISBN: $isbn
-                    Categoría: $category
-                    Sinopsis: $synopsis
-                    Tags: $selectedTags
-                    Reseña: $review
-                    Calificación: $selectedRating estrellas
-                    Compartir reseñas: $shareReviews
-                    Imagen: ${selectedImageUri?.toString() ?: "No seleccionada"}
-                """.trimIndent())
+                Contenido agregado:
+                Título: $title
+                Tipo: $contentType
+                ISBN: $isbn
+                Categoría: $category
+                Sinopsis: $synopsis
+                Tags: $selectedTags
+                Reseña: $review
+                Calificación: $selectedRating estrellas
+                Compartir reseñas: $shareReviews
+                Imagen: ${selectedImageUri?.toString() ?: "No seleccionada"}
+            """.trimIndent())
 
-                showToast("¡Contenido agregado exitosamente!")
+                showCustomToast("¡Contenido agregado exitosamente!")
 
-                // Simular guardado y cerrar actividad después de un breve delay
+                // Navegar al Home solo después de confirmar
                 Handler(Looper.getMainLooper()).postDelayed({
+                    val intent = Intent(this@AddContent, Home::class.java)
+                    startActivity(intent)
                     finish()
                 }, 1000)
             }
             .setNegativeButton("Cancelar") { dialog, _ ->
                 dialog.dismiss()
+                // No navega - se queda en la pantalla actual
             }
             .show()
     }
 
-
     private fun showCancelConfirmation() {
         if (hasUnsavedChanges()) {
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
                 .setTitle("Cambios sin guardar")
                 .setMessage("Tiene información sin guardar. ¿Está seguro de que desea salir?")
                 .setPositiveButton("Salir sin guardar") { _, _ ->
+                    // Solo aquí navega al Home
+                    val intent = Intent(this, Home::class.java)
+                    startActivity(intent)
                     finish()
                 }
                 .setNegativeButton("Continuar editando") { dialog, _ ->
                     dialog.dismiss()
+                    // No navega - se queda en la pantalla actual
                 }
                 .setNeutralButton("Guardar y salir") { _, _ ->
                     if (validateForm()) {
-                        addContent()
+                        // Guardar sin mostrar diálogo de confirmación adicional
+                        saveContentAndExit()
+                    } else {
+                        // Si la validación falla, no navega
+                        showCustomToast("Por favor corrige los errores antes de guardar")
                     }
                 }
                 .show()
         } else {
+            // Si no hay cambios, navega directamente al Home
+            val intent = Intent(this, Home::class.java)
+            startActivity(intent)
             finish()
         }
+    }
+
+    private fun saveContentAndExit() {
+        val title = etTitle.text.toString().trim()
+        val contentType = when {
+            switchOption1.isChecked -> "Película"
+            switchOption2.isChecked -> "Serie"
+            switchOption3.isChecked -> "Libro"
+            else -> ""
+        }
+        val isbn = if (switchOption3.isChecked) etISBN.text.toString().trim() else ""
+        val category = etCategory.text.toString().trim()
+        val synopsis = etSynopsis.text.toString().trim()
+        val review = etReview.text.toString().trim()
+        val shareReviews = switchShareReviews.isChecked
+
+        // Guardar directamente sin diálogo de confirmación
+        Log.d("AddContent", """
+        Contenido guardado y saliendo:
+        Título: $title
+        Tipo: $contentType
+        ISBN: $isbn
+        Categoría: $category
+        Sinopsis: $synopsis
+        Tags: $selectedTags
+        Reseña: $review
+        Calificación: $selectedRating estrellas
+        Compartir reseñas: $shareReviews
+        Imagen: ${selectedImageUri?.toString() ?: "No seleccionada"}
+    """.trimIndent())
+
+        showCustomToast("¡Contenido guardado exitosamente!")
+
+        // Navegar al Home después de guardar
+        Handler(Looper.getMainLooper()).postDelayed({
+            val intent = Intent(this, Home::class.java)
+            startActivity(intent)
+            finish()
+        }, 1000)
     }
 
     private fun hasUnsavedChanges(): Boolean {
@@ -444,31 +490,49 @@ class AddContent : AppCompatActivity() {
                 selectedRating > 0
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    // NUEVO: Toast personalizado con colores del tema
+    private fun showCustomToast(message: String) {
+        val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
+        val view = toast.view
+        view?.let {
+            // Aplicar colores personalizados al toast
+            it.background = ContextCompat.getDrawable(this, R.drawable.toast_background)
+            val textView = it.findViewById<TextView>(android.R.id.message)
+            textView?.setTextColor(ContextCompat.getColor(this, R.color.white))
+        }
+        toast.show()
     }
 
-    // MEJORADO: Control de tags con límite máximo
+
     private fun setupTagsListener() {
-        for (i in 0 until chipGroupTags.childCount) {
-            val chip = chipGroupTags.getChildAt(i) as Chip
-            chip.setOnCheckedChangeListener { _, isChecked ->
-                val tagText = chip.text.toString()
+        chipGroupTags.setOnCheckedStateChangeListener { group, checkedIds ->
+            // Limpiar la lista actual
+            selectedTags.clear()
 
-                if (isChecked) {
-                    if (selectedTags.size >= 5) {
-                        chip.isChecked = false
-                        showToast("Máximo 5 tags permitidos")
-                        return@setOnCheckedChangeListener
-                    }
-                    selectedTags.add(tagText)
-                } else {
-                    selectedTags.remove(tagText)
-                }
-
-                Log.d("SelectedTags", "Tags seleccionados: $selectedTags")
+            // Verificar límite máximo
+            if (checkedIds.size > 5) {
+                showCustomToast("Máximo 5 tags permitidos")
+                // Desmarcar el último chip seleccionado
+                val lastChipId = checkedIds.last()
+                group.check(lastChipId)
+                return@setOnCheckedStateChangeListener
             }
+
+            // Agregar tags seleccionados
+            checkedIds.forEach { chipId ->
+                val chip = findViewById<Chip>(chipId)
+                selectedTags.add(chip.text.toString())
+            }
+
+            Log.d("SelectedTags", "Tags seleccionados: $selectedTags")
         }
+    }
+
+
+
+    // Función auxiliar para convertir dp a px
+    private fun Int.dpToPx(): Float {
+        return this * resources.displayMetrics.density
     }
 
     private fun setupExclusiveSwitches() {
@@ -517,6 +581,7 @@ class AddContent : AppCompatActivity() {
         }
     }
 
+    // MEJORADO: Category selector con tema personalizado
     private fun showCategorySelector() {
         val categoryOptions = arrayOf(
             "Acción", "Aventura", "Comedia", "Drama", "Terror", "Thriller",
@@ -525,12 +590,24 @@ class AddContent : AppCompatActivity() {
             "Guerra", "Deportes", "Suspenso", "Western", "Noir"
         )
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle("Seleccionar categoría")
             .setItems(categoryOptions) { _, which ->
                 etCategory.setText(categoryOptions[which])
             }
-            .show()
+            .create()
+
+        dialog.show()
+
+        // Forzar color blanco en el ListView
+        dialog.listView?.let { listView ->
+            listView.setBackgroundColor(ContextCompat.getColor(this, R.color.fondoNegro))
+            for (i in 0 until listView.count) {
+                listView.getChildAt(i)?.let { child ->
+                    (child as? TextView)?.setTextColor(ContextCompat.getColor(this, R.color.white))
+                }
+            }
+        }
     }
 
     private fun setupStarRating() {
