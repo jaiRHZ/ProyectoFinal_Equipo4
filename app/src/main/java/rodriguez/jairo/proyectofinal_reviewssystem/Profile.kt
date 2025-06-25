@@ -45,11 +45,19 @@ class Profile : AppCompatActivity() {
         ))
 
         films.add(Film(
-            "The Brutalist",
+            "Anora",
             R.drawable.stars,
             R.drawable.thebrutalist,
             "At its core is brutal class commentary, painting a very well presented contrast between two very different lifestyles.", // descripción larga
             "I liked it for the same reason people hated it"
+        ))
+
+        films.add(Film(
+            "Conclave",
+            R.drawable.stars,
+            R.drawable.conclave,
+            "Oscar Worthy Through and Through",
+            "The Conclave is a great film that is sure to keep you on the edge of your seat and holding your breath. Edward Berger's vision is perfectly executed in just about every way possible."
         ))
     }
 
