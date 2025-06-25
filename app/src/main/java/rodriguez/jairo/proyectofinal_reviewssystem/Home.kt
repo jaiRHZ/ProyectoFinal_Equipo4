@@ -12,7 +12,6 @@ import android.widget.GridView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class Home : AppCompatActivity() {
@@ -35,7 +34,7 @@ class Home : AppCompatActivity() {
         val home: ImageView = findViewById(R.id.profile_home)
 
         val filterHome: ImageView = findViewById(R.id.filter_home)
-        val btnAddContent: FloatingActionButton = findViewById(R.id.btnAddContent_home)
+        val btnAddContent: Button = findViewById(R.id.btnAddContent_home)
 
         home.setOnClickListener{
             val intent: Intent = Intent(this, Profile::class.java)
@@ -128,10 +127,12 @@ class Home : AppCompatActivity() {
             stars.setImageResource(pelicula.stars)
 
             image.setOnClickListener {
-                var intento = Intent(contexto, Profile::class.java)
+                var intento = Intent(contexto, Detail::class.java)
                 intento.putExtra("Title", pelicula.title)
                 intento.putExtra("Image", pelicula.image)
                 intento.putExtra("Rate", pelicula.stars)
+                intento.putExtra("description", pelicula.description)
+                intento.putExtra("review", pelicula.review)
                 contexto!!.startActivity(intento)
             }
 
