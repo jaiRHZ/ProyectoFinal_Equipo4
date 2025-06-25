@@ -62,7 +62,7 @@ class EditContent : AppCompatActivity() {
 
         initializeViews()
         setupClickListeners()
-        loadExistingData() // Cargar datos existentes para edición
+        loadExistingData()
     }
 
     private fun initializeViews() {
@@ -81,8 +81,7 @@ class EditContent : AppCompatActivity() {
     }
 
     private fun loadExistingData() {
-        // Aquí se cargarian los datos de existentes para edición
-
+        // Implementar carga real
     }
 
     private fun setupClickListeners() {
@@ -95,60 +94,23 @@ class EditContent : AppCompatActivity() {
 
     private fun setupButtonListeners() {
         btnApplyChanges.setOnClickListener {
-            if (validateForm()) {
-                applyChanges()
-                val intent = Intent(this, Home::class.java)
-                startActivity(intent)
-                finish()
-            }
+            if (validateForm()) applyChanges()
         }
 
         btnCancel.setOnClickListener {
             showCancelConfirmation()
-
-            val intent = Intent(this, Home::class.java)
-            startActivity(intent)
-            finish()
         }
-
-
     }
-
 
     private fun validateForm(): Boolean {
         var isValid = true
 
-        // Validar título
-        if (!validateTitle()) {
-            isValid = false
-        }
-
-        // Validar tipo de contenido
-        if (!validateContentType()) {
-            isValid = false
-        }
-
-        // Validar ISBN si es libro
-        if (switchOption3.isChecked && !validateISBN()) {
-            isValid = false
-        }
-
-        // Validar categoría
-        if (!validateCategory()) {
-            isValid = false
-        }
-
-        // Validar sinopsis
-        if (!validateSynopsis()) {
-            isValid = false
-        }
-
-        // Validar tags
-        if (!validateTags()) {
-            isValid = false
-        }
-
-        // Validar imagen (opcional para EditContent con aviso amigable)
+        if (!validateTitle()) isValid = false
+        if (!validateContentType()) isValid = false
+        if (switchOption3.isChecked && !validateISBN()) isValid = false
+        if (!validateCategory()) isValid = false
+        if (!validateSynopsis()) isValid = false
+        if (!validateTags()) isValid = false
         validateImage()
 
         return isValid
@@ -156,101 +118,71 @@ class EditContent : AppCompatActivity() {
 
     private fun validateTitle(): Boolean {
         val title = etTitle.text.toString().trim()
-
         return when {
             title.isEmpty() -> {
                 etTitle.error = "El título es requerido"
-                etTitle.requestFocus()
-                false
+                etTitle.requestFocus(); false
             }
             title.length < 2 -> {
-                etTitle.error = "El título debe tener al menos 2 caracteres"
-                etTitle.requestFocus()
-                false
+                etTitle.error = "Debe tener al menos 2 caracteres"
+                etTitle.requestFocus(); false
             }
             title.length > 100 -> {
-                etTitle.error = "El título no puede exceder 100 caracteres"
-                etTitle.requestFocus()
-                false
-            }
-            else -> {
-                etTitle.error = null
-                true
-            }
-        }
-    }
-
-    private fun validateContentType(): Boolean {
-        val hasSelection = switchOption1.isChecked || switchOption2.isChecked || switchOption3.isChecked
-
-        return if (!hasSelection) {
-            showToast("Selecciona un tipo de contenido (Película, Serie o Libro)")
-            false
-        } else {
-            true
-        }
-    }
-
-    private fun validateISBN(): Boolean {
-        val isbn = etISBN.text.toString().trim()
-
-        return when {
-            isbn.isEmpty() -> {
-                etISBN.error = "El ISBN es requerido para libros"
-                etISBN.requestFocus()
-                false
-            }
-            !isValidISBN(isbn) -> {
-                etISBN.error = "Formato de ISBN inválido (debe ser ISBN-10 o ISBN-13)"
-                etISBN.requestFocus()
-                false
-            }
-            else -> {
-                etISBN.error = null
-                true
-            }
-        }
-    }
-
-    private fun validateCategory(): Boolean {
-        val category = etCategory.text.toString().trim()
-
-        return when {
-            category.isEmpty() -> {
-                showToast("Selecciona una categoría")
-                etCategory.requestFocus()
-                false
+                etTitle.error = "No puede exceder 100 caracteres"
+                etTitle.requestFocus(); false
             }
             else -> true
         }
     }
 
-    private fun validateSynopsis(): Boolean {
-        val synopsis = etSynopsis.text.toString().trim()
+    private fun validateContentType(): Boolean {
+        return if (!(switchOption1.isChecked || switchOption2.isChecked || switchOption3.isChecked)) {
+            showToast("Selecciona un tipo de contenido")
+            false
+        } else true
+    }
 
+    private fun validateISBN(): Boolean {
+        val isbn = etISBN.text.toString().trim()
         return when {
-            synopsis.isEmpty() -> {
-                etSynopsis.error = "La sinopsis es requerida"
-                etSynopsis.requestFocus()
-                false
+            isbn.isEmpty() -> {
+                etISBN.error = "El ISBN es requerido"
+                etISBN.requestFocus(); false
             }
-            synopsis.length < 10 -> {
-                etSynopsis.error = "La sinopsis debe tener al menos 10 caracteres"
-                etSynopsis.requestFocus()
-                false
+            !isValidISBN(isbn) -> {
+                etISBN.error = "ISBN inválido (ISBN-10 o ISBN-13)"
+                etISBN.requestFocus(); false
             }
-            synopsis.length > 500 -> {
-                etSynopsis.error = "La sinopsis no puede exceder 500 caracteres"
-                etSynopsis.requestFocus()
-                false
-            }
-            else -> {
-                etSynopsis.error = null
-                true
-            }
+            else -> true
         }
     }
 
+    private fun validateCategory(): Boolean {
+        val category = etCategory.text.toString().trim()
+        return if (category.isEmpty()) {
+            showToast("Selecciona una categoría")
+            etCategory.requestFocus(); false
+        } else true
+    }
+
+    private fun validateSynopsis(): Boolean {
+        val synopsis = etSynopsis.text.toString().trim()
+        return when {
+            synopsis.isEmpty() -> {
+                etSynopsis.error = "La sinopsis es requerida"
+                etSynopsis.requestFocus(); false
+            }
+            synopsis.length < 10 -> {
+                etSynopsis.error = "Mínimo 10 caracteres"
+                etSynopsis.requestFocus(); false
+            }
+            synopsis.length > 500 -> {
+                etSynopsis.error = "Máximo 500 caracteres"
+                etSynopsis.requestFocus(); false
+            }
+            else -> true
+        }
+    }
 
     private fun validateTags(): Boolean {
         return when {
@@ -259,54 +191,39 @@ class EditContent : AppCompatActivity() {
                 false
             }
             selectedTags.size > 5 -> {
-                showToast("No puedes seleccionar más de 5 tags")
+                showToast("Máximo 5 tags permitidos")
                 false
             }
             else -> true
         }
     }
 
-
     private fun validateImage(): Boolean {
         return if (selectedImageUri == null) {
             showToast("Recomendamos mantener o actualizar la imagen de portada")
-            true // No bloquea el guardado en edición, solo avisa
-        } else {
             true
-        }
+        } else true
     }
 
     private fun isValidISBN(isbn: String): Boolean {
-        val cleanISBN = isbn.replace("-", "").replace(" ", "")
-
-        return when (cleanISBN.length) {
-            10 -> isValidISBN10(cleanISBN)
-            13 -> isValidISBN13(cleanISBN)
+        val clean = isbn.replace("-", "").replace(" ", "")
+        return when (clean.length) {
+            10 -> isValidISBN10(clean)
+            13 -> isValidISBN13(clean)
             else -> false
         }
     }
 
     private fun isValidISBN10(isbn: String): Boolean {
         if (!isbn.matches(Regex("^[0-9]{9}[0-9X]$"))) return false
-
-        var sum = 0
-        for (i in 0..8) {
-            sum += (isbn[i].toString().toInt()) * (10 - i)
-        }
-
-        val checkDigit = if (isbn[9] == 'X') 10 else isbn[9].toString().toInt()
-        return (sum + checkDigit) % 11 == 0
+        val sum = isbn.take(9).mapIndexed { i, c -> (10 - i) * c.digitToInt() }.sum() +
+                if (isbn[9] == 'X') 10 else isbn[9].digitToInt()
+        return sum % 11 == 0
     }
 
     private fun isValidISBN13(isbn: String): Boolean {
         if (!isbn.matches(Regex("^[0-9]{13}$"))) return false
-
-        var sum = 0
-        for (i in isbn.indices) {
-            val digit = isbn[i].toString().toInt()
-            sum += if (i % 2 == 0) digit else digit * 3
-        }
-
+        val sum = isbn.mapIndexed { i, c -> c.digitToInt() * if (i % 2 == 0) 1 else 3 }.sum()
         return sum % 10 == 0
     }
 
@@ -322,61 +239,60 @@ class EditContent : AppCompatActivity() {
         val category = etCategory.text.toString().trim()
         val synopsis = etSynopsis.text.toString().trim()
 
-        // Mostrar confirmación antes de guardar cambios
-        AlertDialog.Builder(this)
+        AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle("Confirmar cambios")
-            .setMessage("¿Está seguro de que desea aplicar estos cambios?")
+            .setMessage("¿Está seguro de aplicar los cambios?")
             .setPositiveButton("Sí") { _, _ ->
-                // Lógica para guardar los cambios
                 Log.d("EditContent", """
-                    Cambios aplicados:
                     Título: $title
                     Tipo: $contentType
                     ISBN: $isbn
                     Categoría: $category
                     Sinopsis: $synopsis
                     Tags: $selectedTags
-                    Imagen: ${selectedImageUri?.toString() ?: "No modificada"}
+                    Imagen: ${selectedImageUri ?: "No modificada"}
                 """.trimIndent())
-
                 showToast("¡Cambios aplicados exitosamente!")
 
-                // Simular guardado y cerrar actividad después de un breve delay
                 Handler(Looper.getMainLooper()).postDelayed({
+                    startActivity(Intent(this, Home::class.java))
                     finish()
                 }, 1000)
             }
-            .setNegativeButton("Cancelar") { dialog, _ ->
-                dialog.dismiss()
-            }
+            .setNegativeButton("Cancelar", null)
             .show()
     }
 
-
     private fun showCancelConfirmation() {
         if (hasUnsavedChanges()) {
-            AlertDialog.Builder(this)
+            AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
                 .setTitle("Cambios sin guardar")
-                .setMessage("Tiene cambios sin guardar. ¿Está seguro de que desea salir?")
+                .setMessage("Tiene cambios sin guardar. ¿Salir?")
                 .setPositiveButton("Salir sin guardar") { _, _ ->
+                    startActivity(Intent(this, Home::class.java))
                     finish()
                 }
-                .setNegativeButton("Continuar editando") { dialog, _ ->
-                    dialog.dismiss()
-                }
+                .setNegativeButton("Seguir editando", null)
                 .setNeutralButton("Guardar y salir") { _, _ ->
-                    if (validateForm()) {
-                        applyChanges()
-                    }
+                    if (validateForm()) saveChangesAndExit()
+                    else showToast("Corrige los errores antes de guardar")
                 }
                 .show()
         } else {
+            startActivity(Intent(this, Home::class.java))
             finish()
         }
     }
 
-    private fun hasUnsavedChanges(): Boolean {
+    private fun saveChangesAndExit() {
+        showToast("¡Cambios guardados exitosamente!")
+        Handler(Looper.getMainLooper()).postDelayed({
+            startActivity(Intent(this, Home::class.java))
+            finish()
+        }, 1000)
+    }
 
+    private fun hasUnsavedChanges(): Boolean {
         return etTitle.text.toString().trim().isNotEmpty() ||
                 etSynopsis.text.toString().trim().isNotEmpty() ||
                 etCategory.text.toString().trim().isNotEmpty() ||
@@ -392,25 +308,18 @@ class EditContent : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-
     private fun setupTagsListener() {
-        for (i in 0 until chipGroupTags.childCount) {
-            val chip = chipGroupTags.getChildAt(i) as Chip
-            chip.setOnCheckedChangeListener { _, isChecked ->
-                val tagText = chip.text.toString()
-
-                if (isChecked) {
-                    if (selectedTags.size >= 5) {
-                        chip.isChecked = false
-                        showToast("Máximo 5 tags permitidos")
-                        return@setOnCheckedChangeListener
-                    }
-                    selectedTags.add(tagText)
-                } else {
-                    selectedTags.remove(tagText)
-                }
-
-                Log.d("SelectedTags", "Tags seleccionados: $selectedTags")
+        chipGroupTags.setOnCheckedStateChangeListener { group, checkedIds ->
+            selectedTags.clear()
+            if (checkedIds.size > 5) {
+                val lastId = checkedIds.last()
+                group.check(lastId) // Se puede optimizar
+                showToast("Máximo 5 tags")
+                return@setOnCheckedStateChangeListener
+            }
+            checkedIds.forEach { id ->
+                val chip = group.findViewById<Chip>(id)
+                selectedTags.add(chip.text.toString())
             }
         }
     }
@@ -423,7 +332,6 @@ class EditContent : AppCompatActivity() {
                 hideAdditionalFields()
             }
         }
-
         switchOption2.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 switchOption1.isChecked = false
@@ -431,7 +339,6 @@ class EditContent : AppCompatActivity() {
                 hideAdditionalFields()
             }
         }
-
         switchOption3.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 switchOption1.isChecked = false
@@ -456,25 +363,21 @@ class EditContent : AppCompatActivity() {
     }
 
     private fun setupCategorySelector() {
-        etCategory.setOnClickListener {
-            showCategorySelector()
-        }
+        etCategory.setOnClickListener { showCategorySelector() }
     }
 
     private fun showCategorySelector() {
-        val categoryOptions = arrayOf(
-            "Acción", "Aventura", "Comedia", "Drama", "Terror", "Thriller",
-            "Romance", "Ciencia Ficción", "Fantasía", "Animación", "Documental",
-            "Musical", "Biografía", "Historia", "Misterio", "Crimen", "Familia",
-            "Guerra", "Deportes", "Suspenso", "Western", "Noir"
-        )
+        val options = arrayOf("Acción", "Aventura", "Comedia", "Drama", "Terror", "Thriller",
+            "Romance", "Ciencia Ficción", "Fantasía", "Animación", "Documental", "Musical",
+            "Biografía", "Historia", "Misterio", "Crimen", "Familia", "Guerra", "Deportes",
+            "Suspenso", "Western", "Noir")
 
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle("Seleccionar categoría")
-            .setItems(categoryOptions) { _, which ->
-                etCategory.setText(categoryOptions[which])
-            }
-            .show()
+            .setItems(options) { _, which -> etCategory.setText(options[which]) }
+            .create()
+
+        dialog.show()
     }
 
     private fun setupImagePicker() {

@@ -1,6 +1,7 @@
 <resources>
 
-    <string name="signup_title">Sign up to iThink</string>
+    <string name="signup_title">Sign up to</string>
+    <string name="signup_title_2">iThink</string>
     <string name="signup_name">Name</string>
     <string name="signup_email">Email</string>
     <string name="signup_birthdate">Birthdate</string>

@@ -61,91 +61,67 @@
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip1"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/CustomChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/boton"
-            android:textColor="@color/white"
-            android:textSize="20sp"
             android:text="@string/filter_tag_1"
-            android:checkable="true" />
+            android:textSize="20sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip2"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/CustomChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/filter_tag_2"
-            android:background="@color/boton"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:checkable="true" />
+            android:textSize="20sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip3"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/CustomChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/filter_tag_3"
-            android:background="@color/boton"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:checkable="true" />
+            android:textSize="20sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip4"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/CustomChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/filter_tag_4"
-            android:background="@color/boton"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:checkable="true" />
+            android:textSize="20sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip5"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/CustomChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/filter_tag_5"
-            android:background="@color/boton"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:checkable="true" />
+            android:textSize="20sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip6"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/CustomChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/filter_tag_6"
-            android:background="@color/boton"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:checkable="true" />
+            android:textSize="20sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip7"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/CustomChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/filter_tag_7"
-            android:background="@color/boton"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:checkable="true" />
+            android:textSize="20sp" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip8"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
+            style="@style/CustomChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/filter_tag_8"
-            android:background="@color/boton"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:checkable="true" />
+            android:textSize="20sp" />
 
     </com.google.android.material.chip.ChipGroup>
 

@@ -14,18 +14,34 @@
        android:paddingBottom="24dp"
        tools:context=".SignUp">
 
-    <TextView
-        android:id="@+id/textView"
+    <LinearLayout
+        android:id="@+id/titleContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="@string/signup_title"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:textSize="40sp"
-        android:textColor="@color/white"
-        android:textStyle="bold"/>
+        app:layout_constraintTop_toTopOf="parent">
+
+     <TextView
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="@string/signup_title"
+         android:textSize="40sp"
+         android:textColor="@color/white"
+         android:textStyle="bold"/>
+
+     <TextView
+         android:layout_marginLeft="12dp"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="@string/signup_title_2"
+         android:textSize="40sp"
+         android:textColor="@color/tituloRojo"
+         android:textStyle="bold"/>
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/textView2"
@@ -38,7 +54,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.15"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/titleContainer" />
 
     <EditText
         android:id="@+id/etName"
@@ -164,6 +180,7 @@
         android:textColor="@color/black"
         android:layout_height="wrap_content"
         android:padding="8dp"
+        android:inputType="textPassword"
         android:drawablePadding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -186,6 +203,7 @@
     <EditText
         android:id="@+id/etConfirmPassword"
         android:layout_width="300dp"
+        android:inputType="textPassword"
         android:textColor="@color/black"
         android:layout_height="wrap_content"
         android:padding="8dp"
