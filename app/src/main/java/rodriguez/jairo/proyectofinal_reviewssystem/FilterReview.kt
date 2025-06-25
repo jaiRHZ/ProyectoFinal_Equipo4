@@ -6,11 +6,13 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.chip.Chip
@@ -90,17 +92,15 @@ class FilterReview : AppCompatActivity() {
     }
 
     private fun setupNavigationListeners() {
-        // Botón de regreso - vuelve al home sin aplicar filtros
         backButton.setOnClickListener {
             showConfirmationDialog(
                 title = "¿Descartar cambios?",
                 message = "Los filtros no se aplicarán si regresas ahora",
                 onConfirm = { navigateToHome(applyFilters = false) },
-                onCancel = { /* No hacer nada */ }
+                onCancel = { /* no-op */ }
             )
         }
 
-        // Botón de aplicar filtros
         applyButton.setOnClickListener {
             if (validateAndApplyFilters()) {
                 navigateToHome(applyFilters = true)
@@ -109,29 +109,21 @@ class FilterReview : AppCompatActivity() {
     }
 
     private fun validateFilters(): Boolean {
-        // Los filtros son válidos incluso si no se selecciona nada
-        // Esto permite mostrar todos los resultados
-        return true
+        return true // siempre válidos
     }
 
     private fun validateAndApplyFilters(): Boolean {
-        // Los filtros son válidos incluso si no se selecciona nada
-        // Esto permite mayor flexibilidad al usuario
-
-        // Si no hay nada seleccionado, mostrar todos los resultados
         if (selectedTags.isEmpty() && !isMyReviewsEnabled && !isExploreReviewsEnabled) {
-            showToast("Se mostrarán todas las revisiones")
+            showCustomToast("Se mostrarán todas las revisiones")
         } else if (selectedTags.isNotEmpty() && !isMyReviewsEnabled && !isExploreReviewsEnabled) {
-            // Si solo hay tags seleccionados, aplicar a todas las revisiones
-            showToast("Filtros de tags aplicados a todas las revisiones")
+            showCustomToast("Filtros de tags aplicados a todas las revisiones")
         } else if (selectedTags.isEmpty() && (isMyReviewsEnabled || isExploreReviewsEnabled)) {
-            // Si solo hay switches activados sin tags
             val reviewType = when {
                 isMyReviewsEnabled && isExploreReviewsEnabled -> "mis revisiones y revisiones de la comunidad"
                 isMyReviewsEnabled -> "mis revisiones"
                 else -> "revisiones de la comunidad"
             }
-            showToast("Se mostrarán todas las $reviewType")
+            showCustomToast("Se mostrarán todas las $reviewType")
         }
 
         applyFilters()
@@ -139,7 +131,6 @@ class FilterReview : AppCompatActivity() {
     }
 
     private fun applyFilters() {
-        // Guardar filtros en SharedPreferences o pasarlos como Intent extras
         val sharedPrefs = getSharedPreferences("FilterPrefs", Context.MODE_PRIVATE)
         with(sharedPrefs.edit()) {
             putStringSet("selected_tags", selectedTags.toSet())
@@ -150,24 +141,21 @@ class FilterReview : AppCompatActivity() {
         }
 
         Log.d("FiltersApplied", "Tags: $selectedTags, MyReviews: $isMyReviewsEnabled, ExploreReviews: $isExploreReviewsEnabled")
-        showToast("Filtros aplicados correctamente")
+        showCustomToast("Filtros aplicados correctamente")
     }
 
     private fun loadSavedFilters() {
         val sharedPrefs = getSharedPreferences("FilterPrefs", Context.MODE_PRIVATE)
 
-        // Cargar tags seleccionados
         val savedTags = sharedPrefs.getStringSet("selected_tags", emptySet()) ?: emptySet()
         selectedTags.clear()
         selectedTags.addAll(savedTags)
 
-        // Aplicar estado a los chips
         for (i in 0 until chipGroupTags.childCount) {
             val chip = chipGroupTags.getChildAt(i) as Chip
             chip.isChecked = savedTags.contains(chip.text.toString())
         }
 
-        // Cargar estado de los switches
         isMyReviewsEnabled = sharedPrefs.getBoolean("my_reviews_enabled", false)
         isExploreReviewsEnabled = sharedPrefs.getBoolean("explore_reviews_enabled", false)
 
@@ -193,7 +181,7 @@ class FilterReview : AppCompatActivity() {
         onConfirm: () -> Unit,
         onCancel: () -> Unit
     ) {
-        AlertDialog.Builder(this)
+        AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton("Sí") { _, _ -> onConfirm() }
@@ -202,25 +190,30 @@ class FilterReview : AppCompatActivity() {
             .show()
     }
 
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun showCustomToast(message: String) {
+        val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
+        val view = toast.view
+        view?.let {
+            it.background = ContextCompat.getDrawable(this, R.drawable.toast_background)
+            val textView = it.findViewById<TextView>(android.R.id.message)
+            textView?.setTextColor(ContextCompat.getColor(this, R.color.white))
+        }
+        toast.show()
     }
 
     private fun clearAllFilters() {
-        // Limpiar tags
         selectedTags.clear()
         for (i in 0 until chipGroupTags.childCount) {
             val chip = chipGroupTags.getChildAt(i) as Chip
             chip.isChecked = false
         }
 
-        // Limpiar switches
         switchMyReviews.isChecked = false
         switchExploreReviews.isChecked = false
         isMyReviewsEnabled = false
         isExploreReviewsEnabled = false
 
-        showToast("Filtros limpiados")
+        showCustomToast("Filtros limpiados")
     }
 
     override fun onBackPressed() {
@@ -235,8 +228,7 @@ class FilterReview : AppCompatActivity() {
         )
     }
 
-    // Metodo opcional para limpiar filtros desde el menú o un botón adicional
     fun addClearFiltersOption() {
-
+        // opcional
     }
 }

@@ -17,9 +17,11 @@ class Login : AppCompatActivity() {
         val signupButton: Button = findViewById(R.id.login_button_signup)
         val forgotButton: Button = findViewById(R.id.login_button_forgot)
         val emailEditText: EditText = findViewById(R.id.login_email)
+        val passEditText: EditText = findViewById(R.id.login_password)
 
         loginButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
+            val password = passEditText.text.toString().trim()
 
             when {
                 email.isEmpty() -> {
@@ -30,8 +32,23 @@ class Login : AppCompatActivity() {
                     emailEditText.error = "Ingresa un email valido"
                     return@setOnClickListener
                 }
+                password.isEmpty() -> {
+                    passEditText.error = "Por favor ingresa tu contraseña"
+                    passEditText.requestFocus()
+                    return@setOnClickListener
+                }
+                !isPasswordValid(password) -> {
+                    passEditText.error = """
+                La contraseña debe contener:
+                - Mínimo 8 caracteres
+                - Letras y números
+                - Sin espacios
+                """.trimIndent()
+                    passEditText.requestFocus()
+                    return@setOnClickListener
+                }
                 else -> {
-                    // Email válido, proceder al login
+                    // Ambos campos son válidos
                     val intent = Intent(this, Home::class.java)
                     startActivity(intent)
                 }
@@ -49,5 +66,17 @@ class Login : AppCompatActivity() {
 
     private fun isEmailValid(email: String): Boolean {
         return PatternsCompat.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    private fun isPasswordValid(password: String): Boolean {
+        if (password.length < 8) return false
+
+        val hasLetter = password.any { it.isLetter() }
+        val hasDigit = password.any { it.isDigit() }
+        if (!hasLetter || !hasDigit) return false
+
+        if (password.any { it.isWhitespace() }) return false
+
+        return true
     }
 }
