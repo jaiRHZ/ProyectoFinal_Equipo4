@@ -12,7 +12,6 @@ import android.widget.GridView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class Home : AppCompatActivity() {
@@ -35,7 +34,7 @@ class Home : AppCompatActivity() {
         val home: ImageView = findViewById(R.id.profile_home)
 
         val filterHome: ImageView = findViewById(R.id.filter_home)
-        val btnAddContent: FloatingActionButton = findViewById(R.id.btnAddContent_home)
+        val btnAddContent: Button = findViewById(R.id.btnAddContent_home)
 
         home.setOnClickListener{
             val intent: Intent = Intent(this, Profile::class.java)
@@ -57,6 +56,41 @@ class Home : AppCompatActivity() {
 
     fun cargarPeliculas(){
         peliculas.add(Film("The Brutalist", R.drawable.stars,R.drawable.thebrutalist, "GOD2", "SI"))
+        peliculas.add(Film(
+            "Anora",
+            R.drawable.stars,
+            R.drawable.anora,
+            "When a visionary architect and his wife flee post-war Europe in 1947 to rebuild their legacy and witness the birth of modern United States, their lives are changed forever by a mysterious, wealthy client.",
+            "Welcome to America."
+        ))
+        peliculas.add(Film(
+            "Conclave",
+            R.drawable.stars,
+            R.drawable.conclave,
+            "After the unexpected death of the Pope, Cardinal Lawrence is tasked with managing the covert and ancient ritual of electing a new one. ",
+            "What happens behind these walls will change everything."
+        ))
+        peliculas.add(Film(
+            "Breaking Bad",
+            R.drawable.stars,
+            R.drawable.breaking,
+            "In the wake of his dramatic escape from captivity, Jesse Pinkman must come to terms with his past in order to forge some kind of future. ",
+            "Average chemistry class"
+        ))
+        peliculas.add(Film(
+            "Malcolm",
+            R.drawable.stars,
+            R.drawable.malcolm,
+            "He does his best to build and live his life in the best way possible. From time to time, he has to help each of his family members whenever they get into trouble. It always leads to unexpected adventures.",
+            "A young male has trouble living with his strange and wild family"
+        ))
+        peliculas.add(Film(
+            "Invincible",
+            R.drawable.stars,
+            R.drawable.invincible,
+            "From the comics to the screen, Invincible follows Mark Grayson's journey of becoming Earth's next great defender after his father, Nolan Grayson: also known as Omni-Man.",
+            "The son of Earth's most powerful superhero"
+        ))
     }
 
     class PeliculaAdapter: BaseAdapter {
@@ -93,10 +127,12 @@ class Home : AppCompatActivity() {
             stars.setImageResource(pelicula.stars)
 
             image.setOnClickListener {
-                var intento = Intent(contexto, Profile::class.java)
+                var intento = Intent(contexto, Detail::class.java)
                 intento.putExtra("Title", pelicula.title)
                 intento.putExtra("Image", pelicula.image)
                 intento.putExtra("Rate", pelicula.stars)
+                intento.putExtra("description", pelicula.description)
+                intento.putExtra("review", pelicula.review)
                 contexto!!.startActivity(intento)
             }
 
