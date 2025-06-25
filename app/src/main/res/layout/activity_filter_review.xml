@@ -9,6 +9,17 @@
     android:background="@color/fondoNegro"
     tools:context=".FilterReview">
 
+
+    <ImageView
+        android:id="@+id/backHome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:padding="10dp"
+        android:src="@drawable/baseline_arrow_back_24"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/textView8"
         android:layout_width="wrap_content"
@@ -173,6 +184,7 @@
         app:layout_constraintTop_toBottomOf="@+id/switchMyReviews" />
 
     <Button
+        android:id="@+id/applyFiltersButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/round_button"
