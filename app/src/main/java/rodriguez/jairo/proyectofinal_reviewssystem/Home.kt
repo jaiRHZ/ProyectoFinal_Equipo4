@@ -12,6 +12,7 @@ import android.widget.GridView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class Home : AppCompatActivity() {
@@ -32,13 +33,26 @@ class Home : AppCompatActivity() {
 
         var gridPelis: GridView = findViewById(R.id.movies_catalog)
         val home: ImageView = findViewById(R.id.profile_home)
+
+        val filterHome: ImageView = findViewById(R.id.filter_home)
+        val btnAddContent: FloatingActionButton = findViewById(R.id.btnAddContent_home)
+
         home.setOnClickListener{
             val intent: Intent = Intent(this, Profile::class.java)
             startActivity(intent)
         }
 
-        gridPelis.adapter = adapter
+        filterHome.setOnClickListener{
+            val intent: Intent = Intent(this, FilterReview::class.java)
+            startActivity(intent)
+        }
 
+        btnAddContent.setOnClickListener {
+            val intent: Intent = Intent(this, AddContent::class.java)
+            startActivity(intent)
+        }
+
+        gridPelis.adapter = adapter
     }
 
     fun cargarPeliculas(){
@@ -123,8 +137,5 @@ class Home : AppCompatActivity() {
 
             return vista
         }
-
-
     }
-
 }
