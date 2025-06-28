@@ -1,3 +1,5 @@
+package rodriguez.jairo.proyectofinal_reviewssystem
+
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -10,9 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import rodriguez.jairo.proyectofinal_reviewssystem.Detail
-import rodriguez.jairo.proyectofinal_reviewssystem.Home
-import rodriguez.jairo.proyectofinal_reviewssystem.R
 
 class AddReview : AppCompatActivity() {
 

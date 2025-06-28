@@ -27,24 +27,34 @@ import com.google.android.material.chip.ChipGroup
 class AddContent : AppCompatActivity() {
 
     private lateinit var etTitle: EditText
-    private lateinit var switchOption1: SwitchCompat
-    private lateinit var switchOption2: SwitchCompat
-    private lateinit var switchOption3: SwitchCompat
+    private lateinit var chipGroupContentType: ChipGroup
+    private lateinit var chipMovie: Chip
+    private lateinit var chipSerie: Chip
+    private lateinit var chipBook: Chip
     private lateinit var textViewISBN: TextView
     private lateinit var etISBN: EditText
     private lateinit var etCategory: EditText
     private lateinit var etSynopsis: EditText
+    private lateinit var etTitleReview: EditText
     private lateinit var etReview: EditText
     private lateinit var chipGroupTags: ChipGroup
     private lateinit var ivCoverImage: ImageView
     private lateinit var switchShareReviews: SwitchCompat
     private lateinit var btnAdd: Button
     private lateinit var btnCancel: Button
+    private lateinit var btnAddCustomTag: Button
 
     private val selectedTags = mutableListOf<String>()
     private val stars = mutableListOf<ImageView>()
     private var selectedRating = 0
     private var selectedImageUri: Uri? = null
+
+    //  Lista de tags predefinidos
+    private val predefinedTags = listOf(
+        "action hero", "alternate history", "anime", "based on book", "based on play", "based on comic",
+        "based on comic book", "based on novel", "based on story", "based on manga", "experimental film",
+        "independent film", "remake", "plot twist", "cult film", "bollywood", "post apocalypse"
+    )
 
     private val imagePickerLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -67,23 +77,27 @@ class AddContent : AppCompatActivity() {
 
         initializeViews()
         setupClickListeners()
+        setupPredefinedTags()
     }
 
     private fun initializeViews() {
         etTitle = findViewById(R.id.etTitle)
-        switchOption1 = findViewById(R.id.switchOption1)
-        switchOption2 = findViewById(R.id.switchOption2)
-        switchOption3 = findViewById(R.id.switchOption3)
+        chipGroupContentType = findViewById(R.id.chipGroupContentType)
+        chipMovie = findViewById(R.id.chipMovie)
+        chipSerie = findViewById(R.id.chipSerie)
+        chipBook = findViewById(R.id.chipBook)
         textViewISBN = findViewById(R.id.textViewISBN)
         etISBN = findViewById(R.id.etISBN)
         etCategory = findViewById(R.id.etCategory)
         etSynopsis = findViewById(R.id.etSynopsis)
+        etTitleReview = findViewById(R.id.etTitleReview)
         etReview = findViewById(R.id.etReview)
         chipGroupTags = findViewById(R.id.chipGroupTags)
         ivCoverImage = findViewById(R.id.ivCoverImage)
         switchShareReviews = findViewById(R.id.switchShareReviews)
         btnAdd = findViewById(R.id.btnAdd)
         btnCancel = findViewById(R.id.btnCancel)
+        btnAddCustomTag = findViewById(R.id.btnAddCustomTag)
 
         // Inicializar estrellas
         stars.add(findViewById(R.id.star1))
@@ -93,14 +107,166 @@ class AddContent : AppCompatActivity() {
         stars.add(findViewById(R.id.star5))
     }
 
+    //  Configurar tags predefinidos dinámicamente
+    private fun setupPredefinedTags() {
+        chipGroupTags.removeAllViews()
+
+        predefinedTags.forEach { tagText ->
+            addChipToGroup(tagText, false)
+        }
+    }
+
+    //  Función para agregar chips al grupo
+    private fun addChipToGroup(text: String, isCustom: Boolean = false) {
+        val chip = Chip(this)
+        chip.text = text
+        chip.isCheckable = true
+        chip.isClickable = true
+        chip.isCloseIconVisible = isCustom // Solo los tags personalizados pueden eliminarse
+
+        // Aplicar estilo personalizado
+        chip.setChipBackgroundColorResource(R.color.chip_background_selector)
+        chip.setTextColor(ContextCompat.getColorStateList(this, R.color.chip_text_color_selector))
+        chip.chipStrokeColor = ContextCompat.getColorStateList(this, R.color.chip_stroke_selector)
+        chip.chipStrokeWidth = 2.dpToPx()
+        chip.textSize = 14f
+
+        // Listener para selección/deselección
+        chip.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                if (selectedTags.size >= 5) {
+                    showCustomToast("Máximo 5 tags permitidos")
+                    chip.isChecked = false
+                    return@setOnCheckedChangeListener
+                }
+                selectedTags.add(text)
+            } else {
+                selectedTags.remove(text)
+            }
+            Log.d("SelectedTags", "Tags seleccionados: $selectedTags")
+        }
+
+        // Listener para eliminar tags personalizados
+        if (isCustom) {
+            chip.setOnCloseIconClickListener {
+                if (chip.isChecked) {
+                    selectedTags.remove(text)
+                }
+                chipGroupTags.removeView(chip)
+                showCustomToast("Tag '$text' eliminado")
+            }
+        }
+
+        chipGroupTags.addView(chip)
+    }
+
+    // Mostrar diálogo para agregar tag personalizado
+    private fun showAddCustomTagDialog() {
+        val editText = EditText(this)
+        editText.hint = "Escribe tu tag personalizado"
+        editText.maxLines = 1
+        editText.setTextColor(ContextCompat.getColor(this, R.color.white))
+        editText.setHintTextColor(ContextCompat.getColor(this, R.color.subtituloGris))
+
+        // Configurar padding
+        val padding = 16.dpToPx().toInt()
+        editText.setPadding(padding, padding, padding, padding)
+
+        AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
+            .setTitle("Agregar Tag Personalizado")
+            .setMessage("Ingresa un tag personalizado para tu contenido:")
+            .setView(editText)
+            .setPositiveButton("Agregar") { _, _ ->
+                val customTag = editText.text.toString().trim()
+                if (validateCustomTag(customTag)) {
+                    addChipToGroup(customTag, true)
+                    showCustomToast("Tag '$customTag' agregado")
+                }
+            }
+            .setNegativeButton("Cancelar") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    //  Validar tag personalizado
+    private fun validateCustomTag(tag: String): Boolean {
+        return when {
+            tag.isEmpty() -> {
+                showCustomToast("El tag no puede estar vacío")
+                false
+            }
+            tag.length < 2 -> {
+                showCustomToast("El tag debe tener al menos 2 caracteres")
+                false
+            }
+            tag.length > 20 -> {
+                showCustomToast("El tag no puede exceder 20 caracteres")
+                false
+            }
+            tagAlreadyExists(tag) -> {
+                showCustomToast("Este tag ya existe")
+                false
+            }
+            else -> true
+        }
+    }
+
+    // NUEVO: Verificar si el tag ya existe
+    private fun tagAlreadyExists(tag: String): Boolean {
+        for (i in 0 until chipGroupTags.childCount) {
+            val chip = chipGroupTags.getChildAt(i) as Chip
+            if (chip.text.toString().equals(tag, ignoreCase = true)) {
+                return true
+            }
+        }
+        return false
+    }
+
     private fun setupClickListeners() {
-        setupExclusiveSwitches()
+        setupContentTypeChips()
         setupCategorySelector()
-        setupTagsListener()
         setupStarRating()
         setupImagePicker()
         setupButtonListeners()
-        setupSwitchListener()
+        setupCustomTagButton()
+    }
+
+    // Configurar ChipGroup para tipo de contenido
+    private fun setupContentTypeChips() {
+        // Configurar selección única para el tipo de contenido
+        chipGroupContentType.isSingleSelection = true
+
+        // Listeners para cada chip
+        chipMovie.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                hideAdditionalFields()
+                Log.d("ContentType", "Película seleccionada")
+            }
+        }
+
+        chipSerie.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                hideAdditionalFields()
+                Log.d("ContentType", "Serie seleccionada")
+            }
+        }
+
+        chipBook.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                showAdditionalFields()
+                Log.d("ContentType", "Libro seleccionado")
+            } else {
+                hideAdditionalFields()
+            }
+        }
+    }
+
+    // NUEVO: Configurar botón de tag personalizado
+    private fun setupCustomTagButton() {
+        btnAddCustomTag.setOnClickListener {
+            showAddCustomTagDialog()
+        }
     }
 
     private fun setupButtonListeners() {
@@ -129,7 +295,7 @@ class AddContent : AppCompatActivity() {
         }
 
         // Validar ISBN si es libro
-        if (switchOption3.isChecked && !validateISBN()) {
+        if (chipBook.isChecked && !validateISBN()) {
             isValid = false
         }
 
@@ -143,8 +309,13 @@ class AddContent : AppCompatActivity() {
             isValid = false
         }
 
-        // Validar tags (mejorado con límite máximo)
+        // Validar tags
         if (!validateTags()) {
+            isValid = false
+        }
+
+        // Validar título de reseña
+        if (!validateTitleReview()) {
             isValid = false
         }
 
@@ -158,7 +329,7 @@ class AddContent : AppCompatActivity() {
             isValid = false
         }
 
-        // Validar imagen (opcional para AddContent, pero con aviso)
+        // Validar imagen
         validateImage()
 
         return isValid
@@ -190,8 +361,9 @@ class AddContent : AppCompatActivity() {
         }
     }
 
+    // MODIFICADO: Validar tipo de contenido usando chips
     private fun validateContentType(): Boolean {
-        val hasSelection = switchOption1.isChecked || switchOption2.isChecked || switchOption3.isChecked
+        val hasSelection = chipMovie.isChecked || chipSerie.isChecked || chipBook.isChecked
 
         return if (!hasSelection) {
             showCustomToast("Selecciona un tipo de contenido (Película, Serie o Libro)")
@@ -275,6 +447,32 @@ class AddContent : AppCompatActivity() {
         }
     }
 
+    private fun validateTitleReview(): Boolean {
+        val titleReview = etTitleReview.text.toString().trim()
+
+        return when {
+            titleReview.isEmpty() -> {
+                etTitleReview.error = "El título de la reseña es requerido"
+                etTitleReview.requestFocus()
+                false
+            }
+            titleReview.length < 3 -> {
+                etTitleReview.error = "El título de la reseña debe tener al menos 3 caracteres"
+                etTitleReview.requestFocus()
+                false
+            }
+            titleReview.length > 80 -> {
+                etTitleReview.error = "El título de la reseña no puede exceder 80 caracteres"
+                etTitleReview.requestFocus()
+                false
+            }
+            else -> {
+                etTitleReview.error = null
+                true
+            }
+        }
+    }
+
     private fun validateReview(): Boolean {
         val review = etReview.text.toString().trim()
 
@@ -310,11 +508,10 @@ class AddContent : AppCompatActivity() {
         }
     }
 
-    // NUEVO: Validación opcional de imagen con aviso amigable
     private fun validateImage(): Boolean {
         return if (selectedImageUri == null) {
             showCustomToast("Recomendamos agregar una imagen de portada")
-            true // No bloquea el guardado, solo avisa
+            true
         } else {
             true
         }
@@ -354,26 +551,26 @@ class AddContent : AppCompatActivity() {
         return sum % 10 == 0
     }
 
+
     private fun addContent() {
         val title = etTitle.text.toString().trim()
         val contentType = when {
-            switchOption1.isChecked -> "Película"
-            switchOption2.isChecked -> "Serie"
-            switchOption3.isChecked -> "Libro"
+            chipMovie.isChecked -> "Película"
+            chipSerie.isChecked -> "Serie"
+            chipBook.isChecked -> "Libro"
             else -> ""
         }
-        val isbn = if (switchOption3.isChecked) etISBN.text.toString().trim() else ""
+        val isbn = if (chipBook.isChecked) etISBN.text.toString().trim() else ""
         val category = etCategory.text.toString().trim()
         val synopsis = etSynopsis.text.toString().trim()
+        val titleReview = etTitleReview.text.toString().trim()
         val review = etReview.text.toString().trim()
         val shareReviews = switchShareReviews.isChecked
 
-        // Crear diálogo con tema personalizado
         AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle("Confirmar adición")
             .setMessage("¿Está seguro de que desea agregar este contenido?")
             .setPositiveButton("Sí") { _, _ ->
-                // Lógica para guardar el contenido
                 Log.d("AddContent", """
                 Contenido agregado:
                 Título: $title
@@ -382,6 +579,7 @@ class AddContent : AppCompatActivity() {
                 Categoría: $category
                 Sinopsis: $synopsis
                 Tags: $selectedTags
+                Título de reseña: $titleReview
                 Reseña: $review
                 Calificación: $selectedRating estrellas
                 Compartir reseñas: $shareReviews
@@ -390,7 +588,6 @@ class AddContent : AppCompatActivity() {
 
                 showCustomToast("¡Contenido agregado exitosamente!")
 
-                // Navegar al Home solo después de confirmar
                 Handler(Looper.getMainLooper()).postDelayed({
                     val intent = Intent(this@AddContent, Home::class.java)
                     startActivity(intent)
@@ -399,7 +596,6 @@ class AddContent : AppCompatActivity() {
             }
             .setNegativeButton("Cancelar") { dialog, _ ->
                 dialog.dismiss()
-                // No navega - se queda en la pantalla actual
             }
             .show()
     }
@@ -410,48 +606,44 @@ class AddContent : AppCompatActivity() {
                 .setTitle("Cambios sin guardar")
                 .setMessage("Tiene información sin guardar. ¿Está seguro de que desea salir?")
                 .setPositiveButton("Salir sin guardar") { _, _ ->
-                    // Solo aquí navega al Home
                     val intent = Intent(this, Home::class.java)
                     startActivity(intent)
                     finish()
                 }
                 .setNegativeButton("Continuar editando") { dialog, _ ->
                     dialog.dismiss()
-                    // No navega - se queda en la pantalla actual
                 }
                 .setNeutralButton("Guardar y salir") { _, _ ->
                     if (validateForm()) {
-                        // Guardar sin mostrar diálogo de confirmación adicional
                         saveContentAndExit()
                     } else {
-                        // Si la validación falla, no navega
                         showCustomToast("Por favor corrige los errores antes de guardar")
                     }
                 }
                 .show()
         } else {
-            // Si no hay cambios, navega directamente al Home
             val intent = Intent(this, Home::class.java)
             startActivity(intent)
             finish()
         }
     }
 
+    // MODIFICADO: Usar chips para determinar tipo de contenido
     private fun saveContentAndExit() {
         val title = etTitle.text.toString().trim()
         val contentType = when {
-            switchOption1.isChecked -> "Película"
-            switchOption2.isChecked -> "Serie"
-            switchOption3.isChecked -> "Libro"
+            chipMovie.isChecked -> "Película"
+            chipSerie.isChecked -> "Serie"
+            chipBook.isChecked -> "Libro"
             else -> ""
         }
-        val isbn = if (switchOption3.isChecked) etISBN.text.toString().trim() else ""
+        val isbn = if (chipBook.isChecked) etISBN.text.toString().trim() else ""
         val category = etCategory.text.toString().trim()
         val synopsis = etSynopsis.text.toString().trim()
+        val titleReview = etTitleReview.text.toString().trim()
         val review = etReview.text.toString().trim()
         val shareReviews = switchShareReviews.isChecked
 
-        // Guardar directamente sin diálogo de confirmación
         Log.d("AddContent", """
         Contenido guardado y saliendo:
         Título: $title
@@ -460,6 +652,7 @@ class AddContent : AppCompatActivity() {
         Categoría: $category
         Sinopsis: $synopsis
         Tags: $selectedTags
+        Título de reseña: $titleReview
         Reseña: $review
         Calificación: $selectedRating estrellas
         Compartir reseñas: $shareReviews
@@ -468,7 +661,6 @@ class AddContent : AppCompatActivity() {
 
         showCustomToast("¡Contenido guardado exitosamente!")
 
-        // Navegar al Home después de guardar
         Handler(Looper.getMainLooper()).postDelayed({
             val intent = Intent(this, Home::class.java)
             startActivity(intent)
@@ -476,26 +668,26 @@ class AddContent : AppCompatActivity() {
         }, 1000)
     }
 
+    // MODIFICADO: Verificar cambios usando chips
     private fun hasUnsavedChanges(): Boolean {
         return etTitle.text.toString().trim().isNotEmpty() ||
                 etSynopsis.text.toString().trim().isNotEmpty() ||
+                etTitleReview.text.toString().trim().isNotEmpty() ||
                 etReview.text.toString().trim().isNotEmpty() ||
                 etCategory.text.toString().trim().isNotEmpty() ||
                 etISBN.text.toString().trim().isNotEmpty() ||
                 selectedTags.isNotEmpty() ||
-                switchOption1.isChecked ||
-                switchOption2.isChecked ||
-                switchOption3.isChecked ||
+                chipMovie.isChecked ||
+                chipSerie.isChecked ||
+                chipBook.isChecked ||
                 selectedImageUri != null ||
                 selectedRating > 0
     }
 
-    // NUEVO: Toast personalizado con colores del tema
     private fun showCustomToast(message: String) {
         val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
         val view = toast.view
         view?.let {
-            // Aplicar colores personalizados al toast
             it.background = ContextCompat.getDrawable(this, R.drawable.toast_background)
             val textView = it.findViewById<TextView>(android.R.id.message)
             textView?.setTextColor(ContextCompat.getColor(this, R.color.white))
@@ -504,63 +696,9 @@ class AddContent : AppCompatActivity() {
     }
 
 
-    private fun setupTagsListener() {
-        chipGroupTags.setOnCheckedStateChangeListener { group, checkedIds ->
-            // Limpiar la lista actual
-            selectedTags.clear()
 
-            // Verificar límite máximo
-            if (checkedIds.size > 5) {
-                showCustomToast("Máximo 5 tags permitidos")
-                // Desmarcar el último chip seleccionado
-                val lastChipId = checkedIds.last()
-                group.check(lastChipId)
-                return@setOnCheckedStateChangeListener
-            }
-
-            // Agregar tags seleccionados
-            checkedIds.forEach { chipId ->
-                val chip = findViewById<Chip>(chipId)
-                selectedTags.add(chip.text.toString())
-            }
-
-            Log.d("SelectedTags", "Tags seleccionados: $selectedTags")
-        }
-    }
-
-
-
-    // Función auxiliar para convertir dp a px
     private fun Int.dpToPx(): Float {
         return this * resources.displayMetrics.density
-    }
-
-    private fun setupExclusiveSwitches() {
-        switchOption1.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                switchOption2.isChecked = false
-                switchOption3.isChecked = false
-                hideAdditionalFields()
-            }
-        }
-
-        switchOption2.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                switchOption1.isChecked = false
-                switchOption3.isChecked = false
-                hideAdditionalFields()
-            }
-        }
-
-        switchOption3.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                switchOption1.isChecked = false
-                switchOption2.isChecked = false
-                showAdditionalFields()
-            } else {
-                hideAdditionalFields()
-            }
-        }
     }
 
     private fun showAdditionalFields() {
@@ -581,13 +719,12 @@ class AddContent : AppCompatActivity() {
         }
     }
 
-    // MEJORADO: Category selector con tema personalizado
     private fun showCategorySelector() {
         val categoryOptions = arrayOf(
-            "Acción", "Aventura", "Comedia", "Drama", "Terror", "Thriller",
-            "Romance", "Ciencia Ficción", "Fantasía", "Animación", "Documental",
-            "Musical", "Biografía", "Historia", "Misterio", "Crimen", "Familia",
-            "Guerra", "Deportes", "Suspenso", "Western", "Noir"
+            "Action", "Adventure", "Comedy", "Drama", "Horror", "Thriller",
+            "Romance", "Science Fiction", "Fantasy", "Animation", "Documentary",
+            "Musical", "Biography", "History", "Mystery", "Crime", "Family",
+            "War", "Sports", "Suspense", "Western", "Noir"
         )
 
         val dialog = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
@@ -599,7 +736,6 @@ class AddContent : AppCompatActivity() {
 
         dialog.show()
 
-        // Forzar color blanco en el ListView
         dialog.listView?.let { listView ->
             listView.setBackgroundColor(ContextCompat.getColor(this, R.color.fondoNegro))
             for (i in 0 until listView.count) {

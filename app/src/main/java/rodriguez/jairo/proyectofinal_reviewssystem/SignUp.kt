@@ -362,7 +362,7 @@ class SignUp : AppCompatActivity() {
     }
 
     private fun showGenderSelector() {
-        val genderOptions = arrayOf("Masculino", "Femenino", "Otro", "Prefiero no decir")
+        val genderOptions = arrayOf("Male", "Female", "Other", "Prefer not to say")
 
         val builder = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
         builder.setTitle("Seleccionar género")

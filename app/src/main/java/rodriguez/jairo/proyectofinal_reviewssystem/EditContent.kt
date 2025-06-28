@@ -17,6 +17,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.chip.Chip
@@ -26,9 +27,10 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 class EditContent : AppCompatActivity() {
 
     private lateinit var etTitle: EditText
-    private lateinit var switchOption1: SwitchMaterial
-    private lateinit var switchOption2: SwitchMaterial
-    private lateinit var switchOption3: SwitchMaterial
+    private lateinit var chipGroupContentType: ChipGroup
+    private lateinit var chipMovie: Chip
+    private lateinit var chipSerie: Chip
+    private lateinit var chipBook: Chip
     private lateinit var textViewISBN: TextView
     private lateinit var etISBN: EditText
     private lateinit var etCategory: EditText
@@ -37,9 +39,17 @@ class EditContent : AppCompatActivity() {
     private lateinit var ivCoverImage: ImageView
     private lateinit var btnApplyChanges: Button
     private lateinit var btnCancel: Button
+    private lateinit var btnAddCustomTag: Button
 
     private val selectedTags = mutableListOf<String>()
     private var selectedImageUri: Uri? = null
+
+    // Lista de tags predefinidos
+    private val predefinedTags = listOf(
+        "action hero", "alternate history", "anime", "based on book", "based on play", "based on comic",
+        "based on comic book", "based on novel", "based on story", "based on manga", "experimental film",
+        "independent film", "remake", "plot twist", "cult film", "bollywood", "post apocalypse"
+    )
 
     private val imagePickerLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -62,14 +72,16 @@ class EditContent : AppCompatActivity() {
 
         initializeViews()
         setupClickListeners()
+        setupPredefinedTags()
         loadExistingData()
     }
 
     private fun initializeViews() {
         etTitle = findViewById(R.id.etTitle)
-        switchOption1 = findViewById(R.id.switchOption1)
-        switchOption2 = findViewById(R.id.switchOption2)
-        switchOption3 = findViewById(R.id.switchOption3)
+        chipGroupContentType = findViewById(R.id.chipGroupContentType)
+        chipMovie = findViewById(R.id.chipMovie)
+        chipSerie = findViewById(R.id.chipSerie)
+        chipBook = findViewById(R.id.chipBook)
         textViewISBN = findViewById(R.id.textViewISBN)
         etISBN = findViewById(R.id.etISBN)
         etCategory = findViewById(R.id.etCategory)
@@ -78,18 +90,176 @@ class EditContent : AppCompatActivity() {
         ivCoverImage = findViewById(R.id.ivCoverImage)
         btnApplyChanges = findViewById(R.id.btnApplyChanges)
         btnCancel = findViewById(R.id.btnCancel)
+        btnAddCustomTag = findViewById(R.id.btnAddCustomTag)
+    }
+
+    // Configurar tags predefinidos dinámicamente
+    private fun setupPredefinedTags() {
+        chipGroupTags.removeAllViews()
+
+        predefinedTags.forEach { tagText ->
+            addChipToGroup(tagText, false)
+        }
+    }
+
+    // Función para agregar chips al grupo
+    private fun addChipToGroup(text: String, isCustom: Boolean = false) {
+        val chip = Chip(this)
+        chip.text = text
+        chip.isCheckable = true
+        chip.isClickable = true
+        chip.isCloseIconVisible = isCustom // Solo los tags personalizados pueden eliminarse
+
+        // Aplicar estilo personalizado
+        chip.setChipBackgroundColorResource(R.color.chip_background_selector)
+        chip.setTextColor(ContextCompat.getColorStateList(this, R.color.chip_text_color_selector))
+        chip.chipStrokeColor = ContextCompat.getColorStateList(this, R.color.chip_stroke_selector)
+        chip.chipStrokeWidth = 2.dpToPx()
+        chip.textSize = 14f
+
+        // Listener para selección/deselección
+        chip.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                if (selectedTags.size >= 5) {
+                    showToast("Máximo 5 tags permitidos")
+                    chip.isChecked = false
+                    return@setOnCheckedChangeListener
+                }
+                selectedTags.add(text)
+            } else {
+                selectedTags.remove(text)
+            }
+            Log.d("SelectedTags", "Tags seleccionados: $selectedTags")
+        }
+
+        // Listener para eliminar tags personalizados
+        if (isCustom) {
+            chip.setOnCloseIconClickListener {
+                if (chip.isChecked) {
+                    selectedTags.remove(text)
+                }
+                chipGroupTags.removeView(chip)
+                showToast("Tag '$text' eliminado")
+            }
+        }
+
+        chipGroupTags.addView(chip)
     }
 
     private fun loadExistingData() {
-        // Implementar carga real
+        // Aquí cargarías los datos existentes del contenido a editar
+        // Por ejemplo:
+        // etTitle.setText(existingContent.title)
+        // if (existingContent.type == "Película") chipMovie.isChecked = true
+        // etc.
     }
 
     private fun setupClickListeners() {
-        setupExclusiveSwitches()
+        setupContentTypeChips()
         setupCategorySelector()
-        setupTagsListener()
         setupImagePicker()
         setupButtonListeners()
+        setupCustomTagButton()
+    }
+
+    // Configurar ChipGroup para tipo de contenido
+    private fun setupContentTypeChips() {
+        // Configurar selección única para el tipo de contenido
+        chipGroupContentType.isSingleSelection = true
+
+        // Listeners para cada chip
+        chipMovie.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                hideAdditionalFields()
+                Log.d("ContentType", "Película seleccionada")
+            }
+        }
+
+        chipSerie.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                hideAdditionalFields()
+                Log.d("ContentType", "Serie seleccionada")
+            }
+        }
+
+        chipBook.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                showAdditionalFields()
+                Log.d("ContentType", "Libro seleccionado")
+            } else {
+                hideAdditionalFields()
+            }
+        }
+    }
+
+    // Configurar botón de tag personalizado
+    private fun setupCustomTagButton() {
+        btnAddCustomTag.setOnClickListener {
+            showAddCustomTagDialog()
+        }
+    }
+
+    // Mostrar diálogo para agregar tag personalizado
+    private fun showAddCustomTagDialog() {
+        val editText = EditText(this)
+        editText.hint = "Escribe tu tag personalizado"
+        editText.maxLines = 1
+        editText.setTextColor(ContextCompat.getColor(this, R.color.white))
+        editText.setHintTextColor(ContextCompat.getColor(this, R.color.subtituloGris))
+
+        // Configurar padding
+        val padding = 16.dpToPx().toInt()
+        editText.setPadding(padding, padding, padding, padding)
+
+        AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
+            .setTitle("Agregar Tag Personalizado")
+            .setMessage("Ingresa un tag personalizado para tu contenido:")
+            .setView(editText)
+            .setPositiveButton("Agregar") { _, _ ->
+                val customTag = editText.text.toString().trim()
+                if (validateCustomTag(customTag)) {
+                    addChipToGroup(customTag, true)
+                    showToast("Tag '$customTag' agregado")
+                }
+            }
+            .setNegativeButton("Cancelar") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    // Validar tag personalizado
+    private fun validateCustomTag(tag: String): Boolean {
+        return when {
+            tag.isEmpty() -> {
+                showToast("El tag no puede estar vacío")
+                false
+            }
+            tag.length < 2 -> {
+                showToast("El tag debe tener al menos 2 caracteres")
+                false
+            }
+            tag.length > 20 -> {
+                showToast("El tag no puede exceder 20 caracteres")
+                false
+            }
+            tagAlreadyExists(tag) -> {
+                showToast("Este tag ya existe")
+                false
+            }
+            else -> true
+        }
+    }
+
+    // Verificar si el tag ya existe
+    private fun tagAlreadyExists(tag: String): Boolean {
+        for (i in 0 until chipGroupTags.childCount) {
+            val chip = chipGroupTags.getChildAt(i) as Chip
+            if (chip.text.toString().equals(tag, ignoreCase = true)) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun setupButtonListeners() {
@@ -107,7 +277,7 @@ class EditContent : AppCompatActivity() {
 
         if (!validateTitle()) isValid = false
         if (!validateContentType()) isValid = false
-        if (switchOption3.isChecked && !validateISBN()) isValid = false
+        if (chipBook.isChecked && !validateISBN()) isValid = false
         if (!validateCategory()) isValid = false
         if (!validateSynopsis()) isValid = false
         if (!validateTags()) isValid = false
@@ -131,15 +301,23 @@ class EditContent : AppCompatActivity() {
                 etTitle.error = "No puede exceder 100 caracteres"
                 etTitle.requestFocus(); false
             }
-            else -> true
+            else -> {
+                etTitle.error = null
+                true
+            }
         }
     }
 
+    // Validar tipo de contenido usando chips
     private fun validateContentType(): Boolean {
-        return if (!(switchOption1.isChecked || switchOption2.isChecked || switchOption3.isChecked)) {
-            showToast("Selecciona un tipo de contenido")
+        val hasSelection = chipMovie.isChecked || chipSerie.isChecked || chipBook.isChecked
+
+        return if (!hasSelection) {
+            showToast("Selecciona un tipo de contenido (Película, Serie o Libro)")
             false
-        } else true
+        } else {
+            true
+        }
     }
 
     private fun validateISBN(): Boolean {
@@ -153,7 +331,10 @@ class EditContent : AppCompatActivity() {
                 etISBN.error = "ISBN inválido (ISBN-10 o ISBN-13)"
                 etISBN.requestFocus(); false
             }
-            else -> true
+            else -> {
+                etISBN.error = null
+                true
+            }
         }
     }
 
@@ -180,7 +361,10 @@ class EditContent : AppCompatActivity() {
                 etSynopsis.error = "Máximo 500 caracteres"
                 etSynopsis.requestFocus(); false
             }
-            else -> true
+            else -> {
+                etSynopsis.error = null
+                true
+            }
         }
     }
 
@@ -230,12 +414,12 @@ class EditContent : AppCompatActivity() {
     private fun applyChanges() {
         val title = etTitle.text.toString().trim()
         val contentType = when {
-            switchOption1.isChecked -> "Película"
-            switchOption2.isChecked -> "Serie"
-            switchOption3.isChecked -> "Libro"
+            chipMovie.isChecked -> "Película"
+            chipSerie.isChecked -> "Serie"
+            chipBook.isChecked -> "Libro"
             else -> ""
         }
-        val isbn = if (switchOption3.isChecked) etISBN.text.toString().trim() else ""
+        val isbn = if (chipBook.isChecked) etISBN.text.toString().trim() else ""
         val category = etCategory.text.toString().trim()
         val synopsis = etSynopsis.text.toString().trim()
 
@@ -292,15 +476,16 @@ class EditContent : AppCompatActivity() {
         }, 1000)
     }
 
+    // Verificar cambios usando chips
     private fun hasUnsavedChanges(): Boolean {
         return etTitle.text.toString().trim().isNotEmpty() ||
                 etSynopsis.text.toString().trim().isNotEmpty() ||
                 etCategory.text.toString().trim().isNotEmpty() ||
                 etISBN.text.toString().trim().isNotEmpty() ||
                 selectedTags.isNotEmpty() ||
-                switchOption1.isChecked ||
-                switchOption2.isChecked ||
-                switchOption3.isChecked ||
+                chipMovie.isChecked ||
+                chipSerie.isChecked ||
+                chipBook.isChecked ||
                 selectedImageUri != null
     }
 
@@ -308,46 +493,8 @@ class EditContent : AppCompatActivity() {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun setupTagsListener() {
-        chipGroupTags.setOnCheckedStateChangeListener { group, checkedIds ->
-            selectedTags.clear()
-            if (checkedIds.size > 5) {
-                val lastId = checkedIds.last()
-                group.check(lastId) // Se puede optimizar
-                showToast("Máximo 5 tags")
-                return@setOnCheckedStateChangeListener
-            }
-            checkedIds.forEach { id ->
-                val chip = group.findViewById<Chip>(id)
-                selectedTags.add(chip.text.toString())
-            }
-        }
-    }
-
-    private fun setupExclusiveSwitches() {
-        switchOption1.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                switchOption2.isChecked = false
-                switchOption3.isChecked = false
-                hideAdditionalFields()
-            }
-        }
-        switchOption2.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                switchOption1.isChecked = false
-                switchOption3.isChecked = false
-                hideAdditionalFields()
-            }
-        }
-        switchOption3.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                switchOption1.isChecked = false
-                switchOption2.isChecked = false
-                showAdditionalFields()
-            } else {
-                hideAdditionalFields()
-            }
-        }
+    private fun Int.dpToPx(): Float {
+        return this * resources.displayMetrics.density
     }
 
     private fun showAdditionalFields() {
@@ -367,10 +514,10 @@ class EditContent : AppCompatActivity() {
     }
 
     private fun showCategorySelector() {
-        val options = arrayOf("Acción", "Aventura", "Comedia", "Drama", "Terror", "Thriller",
-            "Romance", "Ciencia Ficción", "Fantasía", "Animación", "Documental", "Musical",
-            "Biografía", "Historia", "Misterio", "Crimen", "Familia", "Guerra", "Deportes",
-            "Suspenso", "Western", "Noir")
+        val options = arrayOf("Action", "Adventure", "Comedy", "Drama", "Horror", "Thriller",
+            "Romance", "Science Fiction", "Fantasy", "Animation", "Documentary",
+            "Musical", "Biography", "History", "Mystery", "Crime", "Family",
+            "War", "Sports", "Suspense", "Western", "Noir")
 
         val dialog = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle("Seleccionar categoría")
