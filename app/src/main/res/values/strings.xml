@@ -35,7 +35,9 @@
     <string name="add_content_category">Category</string>
     <string name="add_content_synopsis">Synopsis</string>
     <string name="add_content_tags">Tags</string>
+    <string name="add_content_add_tag">Add tag</string>
     <string name="add_content_cover_image">Cover image</string>
+    <string name="add_content_title_review">Title review</string>
     <string name="add_content_review">Review</string>
     <string name="add_content_rating">Rating</string>
     <string name="add_content_share_review">Share review</string>
