@@ -46,7 +46,7 @@ class EditContent : AppCompatActivity() {
 
     // Lista de tags predefinidos
     private val predefinedTags = listOf(
-        "action hero", "alternate history", "anime", "based on book", "based on play", "based on comic",
+        "alternate history", "anime", "based on book", "based on play", "based on comic",
         "based on comic book", "based on novel", "based on story", "based on manga", "experimental film",
         "independent film", "remake", "plot twist", "cult film", "bollywood", "post apocalypse"
     )
