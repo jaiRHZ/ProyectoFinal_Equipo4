@@ -57,7 +57,7 @@ class AddReview : AppCompatActivity() {
         outContenTitle = findViewById(R.id.outContentTitle_review)
         inputShortDescription = findViewById(R.id.inputShortDescription_addReview)
         inputFullReview = findViewById(R.id.inputfullreview_addreview)
-        switchPublicShre = findViewById(R.id.switchShareReviews)
+        switchPublicShre = findViewById(R.id.switchPublic_addreview)
 
         btnAddReview_review = findViewById(R.id.btnAdd_review)
         btnBackReview = findViewById(R.id.btnBack_addreview)
