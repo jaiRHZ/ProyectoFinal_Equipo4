@@ -13,5 +13,6 @@
     <color name="boton">#F40612</color>
     <color name="tituloRojo">#E50914</color>
     <color name="botonGris">#363636</color>
+    <color name="error">#FF0000</color>
 
 </resources>

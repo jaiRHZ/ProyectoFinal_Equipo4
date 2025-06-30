@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "291184632144",
+    "project_id": "reviewssystem-2efdc",
+    "storage_bucket": "reviewssystem-2efdc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291184632144:android:aaf28cd83870ec00b24c55",
+        "android_client_info": {
+          "package_name": "rodriguez.jairo.proyectofinal_reviewssystem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2fhu3QPQdGQDtPzv4rJzbc01DxDNrOMA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
