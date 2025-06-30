@@ -97,6 +97,18 @@
         android:background="@color/subtituloGris"
         android:layout_marginHorizontal="50dp"
         android:layout_gravity="end"
+
+        />
+
+    <TextView
+        android:id="@+id/tvError"
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/error"
+        android:textSize="20sp"
+        android:text="@string/error"
+        android:visibility="invisible"
+        android:layout_gravity="center"
         android:layout_marginBottom="65dp"
         />
 

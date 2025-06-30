@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
@@ -19,9 +20,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.Firebase
 import java.util.Calendar
 
 class SignUp : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
 
     private lateinit var etName: EditText
     private lateinit var etEmail: EditText
@@ -39,6 +45,8 @@ class SignUp : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        auth = Firebase.auth
 
         initializeViews()
         setupClickListeners()
@@ -68,7 +76,7 @@ class SignUp : AppCompatActivity() {
         btnRegister.setOnClickListener {
             if (validateForm()) {
                 // Si todas las validaciones pasan, proceder con el registro
-                registerUser()
+                registerUser(etEmail.text.toString(), etPassword.text.toString())
             }
         }
 
@@ -259,14 +267,33 @@ class SignUp : AppCompatActivity() {
         }
     }
 
-    private fun registerUser() {
-        // Mostrar mensaje de éxito
-        showStyledToast("¡Registro exitoso!")
+    private fun registerUser(email: String, password: String) {
+        Log.d("INFO", "email: ${email}, password${password}")
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    Log.d("INFO", "signInWithEmail:success")
+                    val user = auth.currentUser
+                    showStyledToast("¡Registro exitoso!")
+                    val intent = Intent(this, Login::class.java)
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                } else {
+                    Log.w("ERROR", "signInWithEmail:failure", task.exception)
+                    Toast.makeText(
+                        baseContext,
+                        "El registro falló.",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+                // Mostrar mensaje de éxito
+                //showStyledToast("¡Registro exitoso!")
 
-        // Proceder a la pantalla de login
-        val intent = Intent(this, Login::class.java)
-        startActivity(intent)
-        finish() // Opcional: cerrar la actividad actual
+                // Proceder a la pantalla de login
+//        val intent = Intent(this, Login::class.java)
+//        startActivity(intent)
+//        finish() // Opcional: cerrar la actividad actual
+            }
     }
 
     private fun showStyledToast(message: String) {
