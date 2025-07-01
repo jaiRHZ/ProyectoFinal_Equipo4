@@ -49,9 +49,9 @@ class Detail : AppCompatActivity() {
         val viewDetailContent = intent.extras
 
         if (viewDetailContent != null){
-            findViewById<TextView>(R.id.viewTitle_detail).text =viewDetailContent.getString("title")
+            findViewById<TextView>(R.id.viewTitle_detail).text =viewDetailContent.getString("Title")
             findViewById<TextView>(R.id.averageRating_detail).text = viewDetailContent.getString("stars")
-            findViewById<ImageView>(R.id.cover_detail).setImageResource(viewDetailContent.getInt("image"))
+            findViewById<ImageView>(R.id.cover_detail).setImageResource(viewDetailContent.getInt("Image"))
             findViewById<TextView>(R.id.viewContentSynopsis_detail).text = viewDetailContent.getString("description")
             findViewById<TextView>(R.id.viewContentType_detail).text = viewDetailContent.getString("type")
 
