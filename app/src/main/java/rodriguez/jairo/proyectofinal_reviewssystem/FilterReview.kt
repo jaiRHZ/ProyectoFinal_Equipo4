@@ -18,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 
+
 class FilterReview : AppCompatActivity() {
 
     private lateinit var chipGroupTags: ChipGroup
@@ -94,8 +95,8 @@ class FilterReview : AppCompatActivity() {
     private fun setupNavigationListeners() {
         backButton.setOnClickListener {
             showConfirmationDialog(
-                title = "¿Descartar cambios?",
-                message = "Los filtros no se aplicarán si regresas ahora",
+                title = "Discard changes?", // "¿Descartar cambios?"
+                message = "Filters will not be applied if you go back now", // "Los filtros no se aplicarán si regresas ahora"
                 onConfirm = { navigateToHome(applyFilters = false) },
                 onCancel = { /* no-op */ }
             )
@@ -114,16 +115,16 @@ class FilterReview : AppCompatActivity() {
 
     private fun validateAndApplyFilters(): Boolean {
         if (selectedTags.isEmpty() && !isMyReviewsEnabled && !isExploreReviewsEnabled) {
-            showCustomToast("Se mostrarán todas las revisiones")
+            showCustomToast("All reviews will be shown") // "Se mostrarán todas las revisiones"
         } else if (selectedTags.isNotEmpty() && !isMyReviewsEnabled && !isExploreReviewsEnabled) {
-            showCustomToast("Filtros de tags aplicados a todas las revisiones")
+            showCustomToast("Tag filters applied to all reviews") // "Filtros de tags aplicados a todas las revisiones"
         } else if (selectedTags.isEmpty() && (isMyReviewsEnabled || isExploreReviewsEnabled)) {
             val reviewType = when {
-                isMyReviewsEnabled && isExploreReviewsEnabled -> "mis revisiones y revisiones de la comunidad"
-                isMyReviewsEnabled -> "mis revisiones"
-                else -> "revisiones de la comunidad"
+                isMyReviewsEnabled && isExploreReviewsEnabled -> "my reviews and community reviews" // "mis revisiones y revisiones de la comunidad"
+                isMyReviewsEnabled -> "my reviews" // "mis revisiones"
+                else -> "community reviews" // "revisiones de la comunidad"
             }
-            showCustomToast("Se mostrarán todas las $reviewType")
+            showCustomToast("All $reviewType will be shown") // "Se mostrarán todas las $reviewType"
         }
 
         applyFilters()
@@ -141,7 +142,7 @@ class FilterReview : AppCompatActivity() {
         }
 
         Log.d("FiltersApplied", "Tags: $selectedTags, MyReviews: $isMyReviewsEnabled, ExploreReviews: $isExploreReviewsEnabled")
-        showCustomToast("Filtros aplicados correctamente")
+        showCustomToast("Filters applied successfully") // "Filtros aplicados correctamente"
     }
 
     private fun loadSavedFilters() {
@@ -184,8 +185,8 @@ class FilterReview : AppCompatActivity() {
         AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("Sí") { _, _ -> onConfirm() }
-            .setNegativeButton("No") { _, _ -> onCancel() }
+            .setPositiveButton("Yes") { _, _ -> onConfirm() } // "Sí"
+            .setNegativeButton("No") { _, _ -> onCancel() } // "No"
             .setCancelable(false)
             .show()
     }
@@ -213,13 +214,13 @@ class FilterReview : AppCompatActivity() {
         isMyReviewsEnabled = false
         isExploreReviewsEnabled = false
 
-        showCustomToast("Filtros limpiados")
+        showCustomToast("Filters cleared") // "Filtros limpiados"
     }
 
     override fun onBackPressed() {
         showConfirmationDialog(
-            title = "¿Descartar cambios?",
-            message = "Los filtros no se aplicarán si sales ahora",
+            title = "Discard changes?", // "¿Descartar cambios?"
+            message = "Filters will not be applied if you exit now", // "Los filtros no se aplicarán si sales ahora"
             onConfirm = {
                 super.onBackPressed()
                 navigateToHome(applyFilters = false)

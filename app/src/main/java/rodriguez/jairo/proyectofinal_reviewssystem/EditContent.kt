@@ -121,7 +121,7 @@ class EditContent : AppCompatActivity() {
         chip.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 if (selectedTags.size >= 5) {
-                    showToast("Máximo 5 tags permitidos")
+                    showToast("Maximum 5 tags allowed")
                     chip.isChecked = false
                     return@setOnCheckedChangeListener
                 }
@@ -139,7 +139,7 @@ class EditContent : AppCompatActivity() {
                     selectedTags.remove(text)
                 }
                 chipGroupTags.removeView(chip)
-                showToast("Tag '$text' eliminado")
+                showToast("Tag '$text' removed")
             }
         }
 
@@ -202,7 +202,7 @@ class EditContent : AppCompatActivity() {
     // Mostrar diálogo para agregar tag personalizado
     private fun showAddCustomTagDialog() {
         val editText = EditText(this)
-        editText.hint = "Escribe tu tag personalizado"
+        editText.hint = "Enter your custom tag"
         editText.maxLines = 1
         editText.setTextColor(ContextCompat.getColor(this, R.color.white))
         editText.setHintTextColor(ContextCompat.getColor(this, R.color.subtituloGris))
@@ -212,17 +212,17 @@ class EditContent : AppCompatActivity() {
         editText.setPadding(padding, padding, padding, padding)
 
         AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
-            .setTitle("Agregar Tag Personalizado")
-            .setMessage("Ingresa un tag personalizado para tu contenido:")
+            .setTitle("Add Custom Tag")
+            .setMessage("Enter a custom tag for your content:")
             .setView(editText)
-            .setPositiveButton("Agregar") { _, _ ->
+            .setPositiveButton("Add") { _, _ ->
                 val customTag = editText.text.toString().trim()
                 if (validateCustomTag(customTag)) {
                     addChipToGroup(customTag, true)
-                    showToast("Tag '$customTag' agregado")
+                    showToast("Tag '$customTag' added")
                 }
             }
-            .setNegativeButton("Cancelar") { dialog, _ ->
+            .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
             }
             .show()
@@ -232,19 +232,19 @@ class EditContent : AppCompatActivity() {
     private fun validateCustomTag(tag: String): Boolean {
         return when {
             tag.isEmpty() -> {
-                showToast("El tag no puede estar vacío")
+                showToast("Tag cannot be empty")
                 false
             }
             tag.length < 2 -> {
-                showToast("El tag debe tener al menos 2 caracteres")
+                showToast("Tag must have at least 2 characters")
                 false
             }
             tag.length > 20 -> {
-                showToast("El tag no puede exceder 20 caracteres")
+                showToast("Tag cannot exceed 20 characters")
                 false
             }
             tagAlreadyExists(tag) -> {
-                showToast("Este tag ya existe")
+                showToast("This tag already exists")
                 false
             }
             else -> true
@@ -290,15 +290,15 @@ class EditContent : AppCompatActivity() {
         val title = etTitle.text.toString().trim()
         return when {
             title.isEmpty() -> {
-                etTitle.error = "El título es requerido"
+                etTitle.error = "Title is required"
                 etTitle.requestFocus(); false
             }
             title.length < 2 -> {
-                etTitle.error = "Debe tener al menos 2 caracteres"
+                etTitle.error = "Must have at least 2 characters"
                 etTitle.requestFocus(); false
             }
             title.length > 100 -> {
-                etTitle.error = "No puede exceder 100 caracteres"
+                etTitle.error = "Cannot exceed 100 characters"
                 etTitle.requestFocus(); false
             }
             else -> {
@@ -313,7 +313,7 @@ class EditContent : AppCompatActivity() {
         val hasSelection = chipMovie.isChecked || chipSerie.isChecked || chipBook.isChecked
 
         return if (!hasSelection) {
-            showToast("Selecciona un tipo de contenido (Película, Serie o Libro)")
+            showToast("Select a content type (Movie, Series or Book)")
             false
         } else {
             true
@@ -324,11 +324,11 @@ class EditContent : AppCompatActivity() {
         val isbn = etISBN.text.toString().trim()
         return when {
             isbn.isEmpty() -> {
-                etISBN.error = "El ISBN es requerido"
+                etISBN.error = "ISBN is required"
                 etISBN.requestFocus(); false
             }
             !isValidISBN(isbn) -> {
-                etISBN.error = "ISBN inválido (ISBN-10 o ISBN-13)"
+                etISBN.error = "Invalid ISBN (ISBN-10 or ISBN-13)"
                 etISBN.requestFocus(); false
             }
             else -> {
@@ -341,7 +341,7 @@ class EditContent : AppCompatActivity() {
     private fun validateCategory(): Boolean {
         val category = etCategory.text.toString().trim()
         return if (category.isEmpty()) {
-            showToast("Selecciona una categoría")
+            showToast("Select a category")
             etCategory.requestFocus(); false
         } else true
     }
@@ -350,15 +350,15 @@ class EditContent : AppCompatActivity() {
         val synopsis = etSynopsis.text.toString().trim()
         return when {
             synopsis.isEmpty() -> {
-                etSynopsis.error = "La sinopsis es requerida"
+                etSynopsis.error = "Synopsis is required"
                 etSynopsis.requestFocus(); false
             }
             synopsis.length < 10 -> {
-                etSynopsis.error = "Mínimo 10 caracteres"
+                etSynopsis.error = "Minimum 10 characters"
                 etSynopsis.requestFocus(); false
             }
             synopsis.length > 500 -> {
-                etSynopsis.error = "Máximo 500 caracteres"
+                etSynopsis.error = "Maximum 500 characters"
                 etSynopsis.requestFocus(); false
             }
             else -> {
@@ -371,11 +371,11 @@ class EditContent : AppCompatActivity() {
     private fun validateTags(): Boolean {
         return when {
             selectedTags.isEmpty() -> {
-                showToast("Selecciona al menos un tag")
+                showToast("Select at least one tag")
                 false
             }
             selectedTags.size > 5 -> {
-                showToast("Máximo 5 tags permitidos")
+                showToast("Maximum 5 tags allowed")
                 false
             }
             else -> true
@@ -384,7 +384,7 @@ class EditContent : AppCompatActivity() {
 
     private fun validateImage(): Boolean {
         return if (selectedImageUri == null) {
-            showToast("Recomendamos mantener o actualizar la imagen de portada")
+            showToast("We recommend keeping or updating the cover image")
             true
         } else true
     }
@@ -414,9 +414,9 @@ class EditContent : AppCompatActivity() {
     private fun applyChanges() {
         val title = etTitle.text.toString().trim()
         val contentType = when {
-            chipMovie.isChecked -> "Película"
-            chipSerie.isChecked -> "Serie"
-            chipBook.isChecked -> "Libro"
+            chipMovie.isChecked -> "Movie"
+            chipSerie.isChecked -> "Series"
+            chipBook.isChecked -> "Book"
             else -> ""
         }
         val isbn = if (chipBook.isChecked) etISBN.text.toString().trim() else ""
@@ -424,9 +424,9 @@ class EditContent : AppCompatActivity() {
         val synopsis = etSynopsis.text.toString().trim()
 
         AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
-            .setTitle("Confirmar cambios")
-            .setMessage("¿Está seguro de aplicar los cambios?")
-            .setPositiveButton("Sí") { _, _ ->
+            .setTitle("Confirm changes")
+            .setMessage("Are you sure you want to apply the changes?")
+            .setPositiveButton("Yes") { _, _ ->
                 Log.d("EditContent", """
                     Título: $title
                     Tipo: $contentType
@@ -436,30 +436,30 @@ class EditContent : AppCompatActivity() {
                     Tags: $selectedTags
                     Imagen: ${selectedImageUri ?: "No modificada"}
                 """.trimIndent())
-                showToast("¡Cambios aplicados exitosamente!")
+                showToast("Changes applied successfully!")
 
                 Handler(Looper.getMainLooper()).postDelayed({
                     startActivity(Intent(this, Home::class.java))
                     finish()
                 }, 1000)
             }
-            .setNegativeButton("Cancelar", null)
+            .setNegativeButton("Cancel", null)
             .show()
     }
 
     private fun showCancelConfirmation() {
         if (hasUnsavedChanges()) {
             AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
-                .setTitle("Cambios sin guardar")
-                .setMessage("Tiene cambios sin guardar. ¿Salir?")
-                .setPositiveButton("Salir sin guardar") { _, _ ->
+                .setTitle("Unsaved changes")
+                .setMessage("You have unsaved changes. Exit anyway?")
+                .setPositiveButton("Exit without saving") { _, _ ->
                     startActivity(Intent(this, Home::class.java))
                     finish()
                 }
-                .setNegativeButton("Seguir editando", null)
-                .setNeutralButton("Guardar y salir") { _, _ ->
+                .setNegativeButton("Continue editing", null)
+                .setNeutralButton("Save and exit") { _, _ ->
                     if (validateForm()) saveChangesAndExit()
-                    else showToast("Corrige los errores antes de guardar")
+                    else showToast("Fix errors before saving")
                 }
                 .show()
         } else {
@@ -469,7 +469,7 @@ class EditContent : AppCompatActivity() {
     }
 
     private fun saveChangesAndExit() {
-        showToast("¡Cambios guardados exitosamente!")
+        showToast("Changes saved successfully!")
         Handler(Looper.getMainLooper()).postDelayed({
             startActivity(Intent(this, Home::class.java))
             finish()
@@ -520,7 +520,7 @@ class EditContent : AppCompatActivity() {
             "War", "Sports", "Suspense", "Western", "Noir")
 
         val dialog = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
-            .setTitle("Seleccionar categoría")
+            .setTitle("Select category")
             .setItems(options) { _, which -> etCategory.setText(options[which]) }
             .create()
 
