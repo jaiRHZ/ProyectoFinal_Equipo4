@@ -127,17 +127,17 @@ class SignUp : AppCompatActivity() {
 
         return when {
             name.isEmpty() -> {
-                etName.error = "El nombre es requerido"
+                etName.error = "Name is required"
                 etName.requestFocus()
                 false
             }
             name.length < 2 -> {
-                etName.error = "El nombre debe tener al menos 2 caracteres"
+                etName.error = "Name must have at least 2 characters"
                 etName.requestFocus()
                 false
             }
             !name.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")) -> {
-                etName.error = "El nombre solo puede contener letras y espacios"
+                etName.error = "Name can only contain letters and spaces"
                 etName.requestFocus()
                 false
             }
@@ -154,12 +154,12 @@ class SignUp : AppCompatActivity() {
 
         return when {
             email.isEmpty() -> {
-                etEmail.error = "El email es requerido"
+                etEmail.error = "Email is required"
                 etEmail.requestFocus()
                 false
             }
             !email.matches(emailPattern.toRegex()) -> {
-                etEmail.error = "Formato de email inválido"
+                etEmail.error = "Invalid email format"
                 etEmail.requestFocus()
                 false
             }
@@ -175,11 +175,11 @@ class SignUp : AppCompatActivity() {
 
         return when {
             birthdate.isEmpty() -> {
-                showStyledToast("Selecciona tu fecha de nacimiento")
+                showStyledToast("Please select your birthdate")
                 false
             }
             !isValidAge(birthdate) -> {
-                showStyledToast("Debes ser mayor de 13 años para registrarte")
+                showStyledToast("You must be at least 13 years old to register")
                 false
             }
             else -> true
@@ -191,7 +191,7 @@ class SignUp : AppCompatActivity() {
 
         return when {
             gender.isEmpty() -> {
-                showStyledToast("Selecciona tu género")
+                showStyledToast("Please select your gender")
                 false
             }
             else -> true
@@ -203,12 +203,12 @@ class SignUp : AppCompatActivity() {
 
         return when {
             password.isEmpty() -> {
-                etPassword.error = "La contraseña es requerida"
+                etPassword.error = "Password is required"
                 etPassword.requestFocus()
                 false
             }
             password.length < 8 -> {
-                etPassword.error = "La contraseña debe tener al menos 8 caracteres"
+                etPassword.error = "Password must have at least 8 characters"
                 etPassword.requestFocus()
                 false
             }
@@ -225,12 +225,12 @@ class SignUp : AppCompatActivity() {
 
         return when {
             confirmPassword.isEmpty() -> {
-                etConfirmPassword.error = "Confirma tu contraseña"
+                etConfirmPassword.error = "Please confirm your password"
                 etConfirmPassword.requestFocus()
                 false
             }
             password != confirmPassword -> {
-                etConfirmPassword.error = "Las contraseñas no coinciden"
+                etConfirmPassword.error = "Passwords do not match"
                 etConfirmPassword.requestFocus()
                 false
             }
@@ -274,7 +274,7 @@ class SignUp : AppCompatActivity() {
                 if (task.isSuccessful) {
                     Log.d("INFO", "signInWithEmail:success")
                     val user = auth.currentUser
-                    showStyledToast("¡Registro exitoso!")
+                    showStyledToast("Registration successful!")
                     val intent = Intent(this, Login::class.java)
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(intent)
@@ -282,7 +282,7 @@ class SignUp : AppCompatActivity() {
                     Log.w("ERROR", "signInWithEmail:failure", task.exception)
                     Toast.makeText(
                         baseContext,
-                        "El registro falló.",
+                        "Registration failed.",
                         Toast.LENGTH_SHORT,
                     ).show()
                 }
@@ -392,7 +392,7 @@ class SignUp : AppCompatActivity() {
         val genderOptions = arrayOf("Male", "Female", "Other", "Prefer not to say")
 
         val builder = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
-        builder.setTitle("Seleccionar género")
+        builder.setTitle("Select Gender")
 
         // Crear un adaptador personalizado para las opciones
         val adapter = object : ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, genderOptions) {
