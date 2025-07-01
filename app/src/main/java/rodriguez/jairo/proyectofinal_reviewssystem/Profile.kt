@@ -41,7 +41,8 @@ class Profile : AppCompatActivity() {
             R.drawable.stars,
             R.drawable.thebrutalist,
             "The work creates a character whose life is an amalgam of many people's true experiences during that period of time; so it is very...", // descripción larga
-            "I can see why it got 3 Oscars" // review corta
+            "I can see why it got 3 Oscars",
+            "movies"// review corta
         ))
 
         films.add(Film(
@@ -49,7 +50,8 @@ class Profile : AppCompatActivity() {
             R.drawable.stars,
             R.drawable.anora,
             "At its core is brutal class commentary, painting a very well presented contrast between two very different lifestyles.", // descripción larga
-            "I liked it for the same reason people hated it"
+            "I liked it for the same reason people hated it",
+            "movies"
         ))
 
         films.add(Film(
@@ -57,7 +59,8 @@ class Profile : AppCompatActivity() {
             R.drawable.stars,
             R.drawable.conclave,
             "The Conclave is a great film that is sure to keep you on the edge of your seat and holding your breath. Edward Berger's vision is perfectly executed in just about every way possible.",
-            "Oscar Worthy Through and Through"
+            "Oscar Worthy Through and Through",
+            "movies"
         ))
     }
 
