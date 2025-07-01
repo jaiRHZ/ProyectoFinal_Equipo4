@@ -29,6 +29,15 @@ class Home : AppCompatActivity() {
     private lateinit var filteredPeliculas: ArrayList<Film>
     private lateinit var gridPelis: GridView
 
+    // Chips variables
+    private lateinit var chipGroupContentType: ChipGroup
+    private lateinit var chipMovie: Chip
+    private lateinit var chipSerie: Chip
+    private lateinit var chipBook: Chip
+
+    // Filtros seleccionados
+    private val selectedContentTypes = mutableListOf<String>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
@@ -37,12 +46,19 @@ class Home : AppCompatActivity() {
         setupData()
         setupSearchView()
         setupClickListeners()
+        setupChipsListener()
+        loadSavedChipFilters()
     }
 
     private fun initViews() {
         gridPelis = findViewById(R.id.movies_catalog)
         searchView = findViewById(R.id.searchView)
 
+        // Inicializar chips
+        chipGroupContentType = findViewById(R.id.chipGroupContentType)
+        chipMovie = findViewById(R.id.chipMovie)
+        chipSerie = findViewById(R.id.chipSerie)
+        chipBook = findViewById(R.id.chipBook)
     }
 
     private fun setupData() {
@@ -55,7 +71,105 @@ class Home : AppCompatActivity() {
         gridPelis.adapter = adapter
     }
 
+    private fun setupChipsListener() {
+        // Configurar listener para cada chip individualmente
+        chipMovie.setOnCheckedChangeListener { _, isChecked ->
+            val contentType = "movies"
+            if (isChecked) {
+                if (!selectedContentTypes.contains(contentType)) {
+                    selectedContentTypes.add(contentType)
+                }
+            } else {
+                selectedContentTypes.remove(contentType)
+            }
+            Log.d("SelectedContentTypes", "Content types seleccionados: $selectedContentTypes")
+            applyContentTypeFilters()
+        }
 
+        chipSerie.setOnCheckedChangeListener { _, isChecked ->
+            val contentType = "series"
+            if (isChecked) {
+                if (!selectedContentTypes.contains(contentType)) {
+                    selectedContentTypes.add(contentType)
+                }
+            } else {
+                selectedContentTypes.remove(contentType)
+            }
+            Log.d("SelectedContentTypes", "Content types seleccionados: $selectedContentTypes")
+            applyContentTypeFilters()
+        }
+
+        chipBook.setOnCheckedChangeListener { _, isChecked ->
+            val contentType = "books"
+            if (isChecked) {
+                if (!selectedContentTypes.contains(contentType)) {
+                    selectedContentTypes.add(contentType)
+                }
+            } else {
+                selectedContentTypes.remove(contentType)
+            }
+            Log.d("SelectedContentTypes", "Content types seleccionados: $selectedContentTypes")
+            applyContentTypeFilters()
+        }
+    }
+
+    private fun applyContentTypeFilters() {
+        // Guardar los filtros seleccionados
+        saveChipFilters()
+
+        // Aplicar filtros a la lista
+        filteredPeliculas.clear()
+
+        if (selectedContentTypes.isEmpty()) {
+            // Si no hay tipos seleccionados, mostrar todo
+            filteredPeliculas.addAll(originalPeliculas)
+        } else {
+            // Filtrar por tipos seleccionados
+            originalPeliculas.forEach { pelicula ->
+                if (selectedContentTypes.contains(pelicula.type)) {
+                    filteredPeliculas.add(pelicula)
+                }
+            }
+        }
+
+        // Aplicar también el filtro de búsqueda si existe
+        val currentQuery = searchView.query.toString()
+        if (currentQuery.isNotEmpty()) {
+            filterMovies(currentQuery)
+        } else {
+            adapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun saveChipFilters() {
+        val sharedPrefs = getSharedPreferences("ContentTypeFilters", Context.MODE_PRIVATE)
+        with(sharedPrefs.edit()) {
+            putStringSet("selected_content_types", selectedContentTypes.toSet())
+            putBoolean("movie_selected", chipMovie.isChecked)
+            putBoolean("serie_selected", chipSerie.isChecked)
+            putBoolean("book_selected", chipBook.isChecked)
+            apply()
+        }
+    }
+
+    private fun loadSavedChipFilters() {
+        val sharedPrefs = getSharedPreferences("ContentTypeFilters", Context.MODE_PRIVATE)
+
+        // Cargar tipos de contenido seleccionados
+        val savedContentTypes = sharedPrefs.getStringSet("selected_content_types", emptySet()) ?: emptySet()
+        selectedContentTypes.clear()
+        selectedContentTypes.addAll(savedContentTypes)
+
+        // Restaurar estado de los chips
+        chipMovie.isChecked = sharedPrefs.getBoolean("movie_selected", false)
+        chipSerie.isChecked = sharedPrefs.getBoolean("serie_selected", false)
+        chipBook.isChecked = sharedPrefs.getBoolean("book_selected", false)
+
+        // Aplicar filtros si hay alguno seleccionado
+        if (selectedContentTypes.isNotEmpty()) {
+            applyContentTypeFilters()
+        }
+    }
 
     private fun setupSearchView() {
         // Configurar colores del SearchView
@@ -65,11 +179,9 @@ class Home : AppCompatActivity() {
             setHintTextColor(ContextCompat.getColor(this@Home, R.color.subtituloGris))
         }
 
-
         // Configurar listener para búsqueda
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                // Opcional: cerrar el teclado al enviar
                 searchView.clearFocus()
                 return true
             }
@@ -80,10 +192,7 @@ class Home : AppCompatActivity() {
             }
         })
 
-        // Configurar para que no se iconifique automáticamente
         searchView.isIconifiedByDefault = false
-
-        // Opcional: configurar el ícono de búsqueda
         searchView.setIconifiedByDefault(false)
     }
 
@@ -106,36 +215,66 @@ class Home : AppCompatActivity() {
     }
 
     private fun filterMovies(query: String) {
+        val tempList = ArrayList<Film>()
+
+        // Primero aplicar filtro de tipo de contenido
+        if (selectedContentTypes.isEmpty()) {
+            tempList.addAll(originalPeliculas)
+        } else {
+            originalPeliculas.forEach { pelicula ->
+                if (selectedContentTypes.contains(pelicula.type)) {
+                    tempList.add(pelicula)
+                }
+            }
+        }
+
+        // Luego aplicar filtro de búsqueda
         filteredPeliculas.clear()
 
         if (query.isEmpty()) {
-            // Si no hay query, mostrar todas las películas
-            filteredPeliculas.addAll(originalPeliculas)
+            filteredPeliculas.addAll(tempList)
         } else {
             val searchQuery = query.lowercase(Locale.getDefault())
-
-            //Filtro por título de la pelicula
-            originalPeliculas.forEach { pelicula ->
+            tempList.forEach { pelicula ->
                 val titleMatch = pelicula.title.lowercase(Locale.getDefault()).contains(searchQuery)
-
                 if (titleMatch) {
                     filteredPeliculas.add(pelicula)
                 }
             }
         }
 
-        // Notificar cambios al adapter
         adapter.notifyDataSetChanged()
-
     }
 
+    // Función para limpiar todos los filtros (opcional)
+    fun clearAllFilters() {
+        selectedContentTypes.clear()
+        chipMovie.isChecked = false
+        chipSerie.isChecked = false
+        chipBook.isChecked = false
 
+        searchView.setQuery("", false)
+        searchView.clearFocus()
+
+        filteredPeliculas.clear()
+        filteredPeliculas.addAll(originalPeliculas)
+        adapter.notifyDataSetChanged()
+
+        // Limpiar SharedPreferences
+        val sharedPrefs = getSharedPreferences("ContentTypeFilters", Context.MODE_PRIVATE)
+        sharedPrefs.edit().clear().apply()
+    }
 
     // Función para limpiar la búsqueda (opcional)
     fun clearSearch() {
         searchView.setQuery("", false)
         searchView.clearFocus()
         filterMovies("")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        saveChipFilters() // Guardar cuando la actividad se pause
     }
 
     fun cargarPeliculas(){
