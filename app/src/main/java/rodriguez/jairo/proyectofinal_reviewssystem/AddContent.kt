@@ -22,6 +22,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
@@ -89,6 +92,13 @@ class AddContent : AppCompatActivity() {
         initializeViews()
         setupClickListeners()
         setupPredefinedTags()
+        initCloudinary()
+    }
+
+    private fun initCloudinary() {
+        val config: MutableMap<String, String> = HashMap()
+        config["cloud_name"] = "dob719uzm"
+        MediaManager.init(this, config)
     }
 
     private fun initializeViews() {
@@ -494,8 +504,36 @@ class AddContent : AppCompatActivity() {
         return sum % 10 == 0
     }
 
-    // NUEVA FUNCIÓN: Agregar contenido a Firebase
+
     private fun addContentToFirebase() {
+        if (selectedImageUri != null) {
+            MediaManager.get().upload(selectedImageUri)
+                .unsigned("reviewsystem-upload")
+                .callback(object : UploadCallback {
+                    override fun onStart(requestId: String?) {
+                        showCustomToast("Uploading image...")
+                    }
+
+                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+
+                    override fun onSuccess(requestId: String?, resultData: MutableMap<Any?, Any?>?) {
+                        val imageUrl = resultData?.get("secure_url") as? String ?: ""
+                        addContentWithURL(imageUrl)
+                    }
+
+                    override fun onError(requestId: String?, error: ErrorInfo?) {
+                        showCustomToast("Image upload failed")
+                    }
+
+                    override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+                }).dispatch()
+        } else {
+            addContentWithURL("") // Sin imagen
+        }
+
+    }
+
+    private fun addContentWithURL(imageUrl: String){
         val title = etTitle.text.toString().trim()
         val contentType = when {
             chipMovie.isChecked -> "movies"
@@ -531,8 +569,10 @@ class AddContent : AppCompatActivity() {
         val content = Content(
             id = "", // Se asignará en el ViewModel
             titulo = title,
+            sinopsis = synopsis,
             estrellas = selectedRating,
-            imagen = selectedImageUri?.toString()?.hashCode() ?: 0, // Temporal - necesitarás manejar las imágenes
+            imagen = imageUrl.hashCode(),
+            urlImagen = imageUrl,
             review = arrayListOf(reviewObject),
             type = contentType,
             categoria = category,
@@ -560,6 +600,7 @@ class AddContent : AppCompatActivity() {
             }
             .show()
     }
+
 
     private fun showCancelConfirmation() {
         if (hasUnsavedChanges()) {

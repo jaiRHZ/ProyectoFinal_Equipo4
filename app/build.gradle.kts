@@ -53,6 +53,17 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
     implementation("com.google.firebase:firebase-auth")
 
+
+    // All:
+    implementation ("com.cloudinary:cloudinary-android:3.0.2")
+
+// Download + Preprocess:
+    implementation ("com.cloudinary:cloudinary-android-download:3.0.2")
+    implementation ("com.cloudinary:cloudinary-android-preprocess:3.0.2")
+
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -62,6 +73,7 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.0")
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

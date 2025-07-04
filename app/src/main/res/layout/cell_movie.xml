@@ -23,12 +23,60 @@
         android:layout_marginBottom="5dp"
         />
 
-    <ImageView
-        android:id="@+id/stars_home"
+    <LinearLayout
+        android:layout_gravity="center"
+        android:id="@+id/layoutStars"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="8dp"
-        android:scaleType="fitCenter" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="4dp">
+
+        <ImageView
+            android:id="@+id/star1"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/btn_star_big_off"
+            android:adjustViewBounds="true"
+            android:contentDescription="star 1" />
+
+        <ImageView
+            android:id="@+id/star2"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/btn_star_big_off"
+            android:adjustViewBounds="true"
+            android:contentDescription="star 2" />
+
+        <ImageView
+            android:id="@+id/star3"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/btn_star_big_off"
+            android:adjustViewBounds="true"
+            android:contentDescription="star 3" />
+
+        <ImageView
+            android:id="@+id/star4"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/btn_star_big_off"
+            android:adjustViewBounds="true"
+            android:contentDescription="star 4" />
+
+        <ImageView
+            android:id="@+id/star5"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/btn_star_big_off"
+            android:adjustViewBounds="true"
+            android:contentDescription="star 5" />
+
+    </LinearLayout>
 
 </LinearLayout>
