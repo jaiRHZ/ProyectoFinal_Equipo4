@@ -60,8 +60,6 @@
 
     </LinearLayout>
 
-
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -70,41 +68,42 @@
         android:layout_marginBottom="30dp"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/movies_button"
-            android:layout_width="100dp"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupContentType"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@color/tituloRojo"
-            android:fontFamily="@font/inter_18pt_regular"
-            android:text="Movies"
-            android:textAllCaps="false"
-            android:textSize="15sp"
-            />
-        <Button
-            android:id="@+id/series_button"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@color/tituloRojo"
-            android:fontFamily="@font/inter_18pt_regular"
-            android:text="Series"
-            android:textAllCaps="false"
-            android:textSize="15sp"
-            android:layout_marginLeft="20dp"
-            />
-        <Button
-            android:id="@+id/books_button"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@color/tituloRojo"
-            android:fontFamily="@font/inter_18pt_regular"
-            android:text="Books"
-            android:textAllCaps="false"
-            android:textSize="15sp"
-            android:layout_marginLeft="20dp"
-            />
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="50dp"
+            app:chipSpacingHorizontal="31dp"
+            app:chipSpacingVertical="4dp"
+            >
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipMovie"
+                style="@style/CustomChipStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_content_type_movie"
+                android:textSize="20sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSerie"
+                style="@style/CustomChipStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_content_type_serie"
+                android:textSize="20sp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipBook"
+                style="@style/CustomChipStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_content_type_book"
+                android:textSize="20sp"
+                />
+
+        </com.google.android.material.chip.ChipGroup>
 
     </LinearLayout>
 
@@ -117,15 +116,15 @@
         android:textColor="@color/white"
         android:textSize="24sp" />
 
-    <GridView
-        android:id="@+id/movies_catalog"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:numColumns="3"
         android:paddingHorizontal="6dp" >
 
-    </GridView>
+    </androidx.recyclerview.widget.RecyclerView>
 
 <LinearLayout
     android:layout_width="wrap_content"

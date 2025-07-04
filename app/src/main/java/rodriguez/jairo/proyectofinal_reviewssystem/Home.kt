@@ -16,218 +16,217 @@ import android.widget.SearchView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
 import java.util.Locale
 
 
 class Home : AppCompatActivity() {
-    private lateinit var adapter: PeliculaAdapter
-    private var peliculas = ArrayList<Film>()
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var contentAdapter: ContentAdapter
+    private lateinit var contentViewModel: ContentViewModel
+
+    private var listaContenido = ArrayList<Content>()
+    private lateinit var originalContenido: ArrayList<Content>
+    private lateinit var filteredContenido: ArrayList<Content>
+
+    // Chips
+    private lateinit var chipGroupContentType: ChipGroup
+    private lateinit var chipMovie: Chip
+    private lateinit var chipSerie: Chip
+    private lateinit var chipBook: Chip
+
     private lateinit var searchView: SearchView
-    private lateinit var originalPeliculas: ArrayList<Film>
-    private lateinit var filteredPeliculas: ArrayList<Film>
-    private lateinit var gridPelis: GridView
+    private val selectedContentTypes = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
         initViews()
-        setupData()
+        setupRecyclerView()
+        setupViewModel()
         setupSearchView()
+        setupChipsListener()
         setupClickListeners()
+        loadSavedChipFilters()
     }
 
     private fun initViews() {
-        gridPelis = findViewById(R.id.movies_catalog)
+        recyclerView = findViewById(R.id.rvContent)
         searchView = findViewById(R.id.searchView)
 
+        chipGroupContentType = findViewById(R.id.chipGroupContentType)
+        chipMovie = findViewById(R.id.chipMovie)
+        chipSerie = findViewById(R.id.chipSerie)
+        chipBook = findViewById(R.id.chipBook)
     }
 
-    private fun setupData() {
-        cargarPeliculas()
-        originalPeliculas = ArrayList(peliculas)
-        filteredPeliculas = ArrayList(peliculas)
-
-        // Configurar adapter
-        adapter = PeliculaAdapter(this, filteredPeliculas)
-        gridPelis.adapter = adapter
+    private fun setupRecyclerView() {
+        filteredContenido = ArrayList()
+        contentAdapter = ContentAdapter(filteredContenido) { content ->
+            val intent = Intent(this, Detail::class.java).apply {
+                putExtra("Title", content.titulo)
+                putExtra("ImageUrl", content.urlImagen)   // Cloudinary
+                putExtra("ImageLocal", content.imagen)    // fallback
+                putExtra("Rate", content.estrellas)
+            }
+            startActivity(intent)
+        }
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = contentAdapter
     }
 
-
+    private fun setupViewModel() {
+        contentViewModel = ViewModelProvider(this)[ContentViewModel::class.java]
+        contentViewModel.listaContenidos.observe(this) { contenidos ->
+            listaContenido.clear()
+            listaContenido.addAll(contenidos)
+            originalContenido = ArrayList(listaContenido)
+            filteredContenido = ArrayList(listaContenido)
+            applyContentTypeFilters()
+        }
+    }
 
     private fun setupSearchView() {
-        // Configurar colores del SearchView
         val searchText = searchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
         searchText?.apply {
             setTextColor(ContextCompat.getColor(this@Home, R.color.black))
             setHintTextColor(ContextCompat.getColor(this@Home, R.color.subtituloGris))
         }
 
-
-        // Configurar listener para búsqueda
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                // Opcional: cerrar el teclado al enviar
                 searchView.clearFocus()
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                filterMovies(newText.orEmpty())
+                applyContentTypeFilters()
                 return true
             }
         })
 
-        // Configurar para que no se iconifique automáticamente
         searchView.isIconifiedByDefault = false
-
-        // Opcional: configurar el ícono de búsqueda
         searchView.setIconifiedByDefault(false)
     }
 
-    private fun setupClickListeners() {
-        val home: ImageView = findViewById(R.id.profile_home)
-        val filterHome: ImageView = findViewById(R.id.filter_home)
-        val btnAddContent: Button = findViewById(R.id.btnAddContent_home)
+    private fun setupChipsListener() {
+        chipMovie.setOnCheckedChangeListener { _, isChecked ->
+            val type = "movies"
+            if (isChecked) selectedContentTypes.add(type) else selectedContentTypes.remove(type)
+            applyContentTypeFilters()
+        }
 
-        home.setOnClickListener {
+        chipSerie.setOnCheckedChangeListener { _, isChecked ->
+            val type = "series"
+            if (isChecked) selectedContentTypes.add(type) else selectedContentTypes.remove(type)
+            applyContentTypeFilters()
+        }
+
+        chipBook.setOnCheckedChangeListener { _, isChecked ->
+            val type = "books"
+            if (isChecked) selectedContentTypes.add(type) else selectedContentTypes.remove(type)
+            applyContentTypeFilters()
+        }
+    }
+
+    private fun applyContentTypeFilters() {
+        saveChipFilters()
+        filteredContenido.clear()
+
+        val baseList = if (selectedContentTypes.isEmpty()) {
+            originalContenido
+        } else {
+            originalContenido.filter { selectedContentTypes.contains(it.type) }
+        }
+
+        val currentQuery = searchView.query.toString().lowercase()
+        if (currentQuery.isNotEmpty()) {
+            filteredContenido.addAll(baseList.filter {
+                it.titulo.lowercase().contains(currentQuery)
+            })
+        } else {
+            filteredContenido.addAll(baseList)
+        }
+
+        contentAdapter.actualizarLista(filteredContenido)
+    }
+
+    private fun saveChipFilters() {
+        val sharedPrefs = getSharedPreferences("ContentTypeFilters", Context.MODE_PRIVATE)
+        with(sharedPrefs.edit()) {
+            putStringSet("selected_content_types", selectedContentTypes.toSet())
+            putBoolean("movie_selected", chipMovie.isChecked)
+            putBoolean("serie_selected", chipSerie.isChecked)
+            putBoolean("book_selected", chipBook.isChecked)
+            apply()
+        }
+    }
+
+    private fun loadSavedChipFilters() {
+        val sharedPrefs = getSharedPreferences("ContentTypeFilters", Context.MODE_PRIVATE)
+        val savedContentTypes = sharedPrefs.getStringSet("selected_content_types", emptySet()) ?: emptySet()
+        selectedContentTypes.clear()
+        selectedContentTypes.addAll(savedContentTypes)
+
+        chipMovie.isChecked = sharedPrefs.getBoolean("movie_selected", false)
+        chipSerie.isChecked = sharedPrefs.getBoolean("serie_selected", false)
+        chipBook.isChecked = sharedPrefs.getBoolean("book_selected", false)
+
+        if (selectedContentTypes.isNotEmpty()) {
+            applyContentTypeFilters()
+        }
+    }
+
+    private fun setupClickListeners() {
+        val profile: ImageView = findViewById(R.id.profile_home)
+        val filter: ImageView = findViewById(R.id.filter_home)
+        val btnAdd: Button = findViewById(R.id.btnAddContent_home)
+
+        profile.setOnClickListener {
             startActivity(Intent(this, Profile::class.java))
         }
 
-        filterHome.setOnClickListener {
+        filter.setOnClickListener {
             startActivity(Intent(this, FilterReview::class.java))
         }
 
-        btnAddContent.setOnClickListener {
+        btnAdd.setOnClickListener {
             startActivity(Intent(this, AddContent::class.java))
         }
     }
 
-    private fun filterMovies(query: String) {
-        filteredPeliculas.clear()
-
-        if (query.isEmpty()) {
-            // Si no hay query, mostrar todas las películas
-            filteredPeliculas.addAll(originalPeliculas)
-        } else {
-            val searchQuery = query.lowercase(Locale.getDefault())
-
-            //Filtro por título de la pelicula
-            originalPeliculas.forEach { pelicula ->
-                val titleMatch = pelicula.title.lowercase(Locale.getDefault()).contains(searchQuery)
-
-                if (titleMatch) {
-                    filteredPeliculas.add(pelicula)
-                }
-            }
-        }
-
-        // Notificar cambios al adapter
-        adapter.notifyDataSetChanged()
-
+    override fun onPause() {
+        super.onPause()
+        saveChipFilters()
     }
 
+    fun clearAllFilters() {
+        selectedContentTypes.clear()
+        chipMovie.isChecked = false
+        chipSerie.isChecked = false
+        chipBook.isChecked = false
 
+        searchView.setQuery("", false)
+        searchView.clearFocus()
 
-    // Función para limpiar la búsqueda (opcional)
+        filteredContenido.clear()
+        filteredContenido.addAll(originalContenido)
+        contentAdapter.actualizarLista(filteredContenido)
+
+        val sharedPrefs = getSharedPreferences("ContentTypeFilters", Context.MODE_PRIVATE)
+        sharedPrefs.edit().clear().apply()
+    }
+
     fun clearSearch() {
         searchView.setQuery("", false)
         searchView.clearFocus()
-        filterMovies("")
-    }
-
-    fun cargarPeliculas(){
-        peliculas.add(Film("The Brutalist", R.drawable.stars,R.drawable.thebrutalist, "GOD2", "SI", "movies"))
-        peliculas.add(Film(
-            "Anora",
-            R.drawable.stars,
-            R.drawable.anora,
-            "When a visionary architect and his wife flee post-war Europe in 1947 to rebuild their legacy and witness the birth of modern United States, their lives are changed forever by a mysterious, wealthy client.",
-            "Welcome to America.",
-            "movies"
-        ))
-        peliculas.add(Film(
-            "Conclave",
-            R.drawable.stars,
-            R.drawable.conclave,
-            "After the unexpected death of the Pope, Cardinal Lawrence is tasked with managing the covert and ancient ritual of electing a new one. ",
-            "What happens behind these walls will change everything.",
-            "movies"
-        ))
-        peliculas.add(Film(
-            "Breaking Bad",
-            R.drawable.stars,
-            R.drawable.breaking,
-            "In the wake of his dramatic escape from captivity, Jesse Pinkman must come to terms with his past in order to forge some kind of future. ",
-            "Average chemistry class",
-            "series"
-        ))
-        peliculas.add(Film(
-            "Malcolm",
-            R.drawable.stars,
-            R.drawable.malcolm,
-            "He does his best to build and live his life in the best way possible. From time to time, he has to help each of his family members whenever they get into trouble. It always leads to unexpected adventures.",
-            "A young male has trouble living with his strange and wild family",
-            "series"
-        ))
-        peliculas.add(Film(
-            "Invincible",
-            R.drawable.stars,
-            R.drawable.invincible,
-            "From the comics to the screen, Invincible follows Mark Grayson's journey of becoming Earth's next great defender after his father, Nolan Grayson: also known as Omni-Man.",
-            "The son of Earth's most powerful superhero",
-            "series"
-        ))
-    }
-
-    class PeliculaAdapter: BaseAdapter {
-        var contexto: Context? = null
-        var peliculas = ArrayList<Film>()
-
-        constructor(contexto: Context, peliculas: ArrayList<Film>) {
-            this.contexto = contexto
-            this.peliculas = peliculas
-        }
-
-        override fun getCount(): Int {
-            return peliculas.size
-        }
-
-        override fun getItem(position: Int): Any {
-            return peliculas[position]
-        }
-
-        override fun getItemId(position: Int): Long {
-            return position.toLong()
-        }
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val pelicula = peliculas[position]
-            val inflator = contexto!!.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            val vista = convertView ?: inflator.inflate(R.layout.cell_movie, parent, false)
-
-            val image: ImageView = vista.findViewById(R.id.image_movie_cell)
-            val title: TextView = vista.findViewById(R.id.movie_title_cell)
-            val stars: ImageView = vista.findViewById(R.id.stars_home)
-
-            image.setImageResource(pelicula.image)
-            title.text = pelicula.title
-            stars.setImageResource(pelicula.stars)
-
-            image.setOnClickListener {
-                val intento = Intent(contexto, Detail::class.java).apply {
-                    putExtra("Title", pelicula.title)
-                    putExtra("Image", pelicula.image)
-                    putExtra("Rate", pelicula.stars)
-                    putExtra("description", pelicula.description)
-                    putExtra("review", pelicula.review)
-                }
-                contexto!!.startActivity(intento)
-            }
-
-            return vista
-        }
+        applyContentTypeFilters()
     }
 }
