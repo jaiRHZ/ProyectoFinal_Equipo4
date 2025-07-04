@@ -1,3 +1,19 @@
 package rodriguez.jairo.proyectofinal_reviewssystem.entities
 
-data class Review(var rating: Int, var description: String, var fullReview: String, var share: Boolean)
+data class Review(var id: String = "",
+                  var rating: Int = 0,
+                  var titulo: String = "",
+                  var review: String = "",
+                  var compartir: Boolean = false
+)
+{
+    fun toMap(): Map<String, Any> {
+        return mapOf(
+            "id" to id,
+            "rating" to rating,
+            "titulo" to titulo,
+            "review" to review,
+            "compartir" to compartir
+        )
+    }
+}
