@@ -21,22 +21,10 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import rodriguez.jairo.proyectofinal_reviewssystem.databinding.ActivityAddContentBinding
-import rodriguez.jairo.proyectofinal_reviewssystem.databinding.ActivityHomeBinding
-import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
-import rodriguez.jairo.proyectofinal_reviewssystem.entities.Review
 
-//Main
 class AddContent : AppCompatActivity() {
-
-    private lateinit var binding: ActivityAddContentBinding
-    private lateinit var adapter: ContentAdapter
-    private lateinit var viewModel: ContentViewModel
-
-    var contentEdit = Content()
 
     private lateinit var etTitle: EditText
     private lateinit var chipGroupContentType: ChipGroup
@@ -80,43 +68,12 @@ class AddContent : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        setContentView(R.layout.activity_add_content)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        binding = ActivityAddContentBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        viewModel = ViewModelProvider(this)[ContentViewModel::class.java]
-
-
-
-        binding.btnAdd.setOnClickListener{
-            val review = Review(
-                rating = selectedRating,
-                titulo = binding.etTitleReview.text.toString(),
-                review = binding.etReview.text.toString(),
-                compartir = switchShareReviews.isChecked
-            )
-
-            val contenido = Content(
-
-                titulo = binding.etTitle.text.toString(),
-                type = if (chipBook.isChecked) chipBook.text.toString() else "",
-                imagen = binding.ivCoverImage.id
-
-            )
-
-            viewModel.agregarContenidos(contenido)
-
-            binding.etTitle.setText("")
-            //binding.etDescripcion.setText("")
-        }
-
-
-
 
         initializeViews()
         setupClickListeners()
