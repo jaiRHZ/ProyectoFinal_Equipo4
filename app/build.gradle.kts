@@ -18,6 +18,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures{
+        viewBinding = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -40,6 +44,12 @@ android {
 }
 
 dependencies {
+    //Firebase Firestore
+    implementation ("com.google.firebase:firebase-firestore-ktx:25.1.3")
+    implementation ("com.google.firebase:firebase-core:21.1.1")
+    //ViewModel
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.1")
+
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
     implementation("com.google.firebase:firebase-auth")
 
