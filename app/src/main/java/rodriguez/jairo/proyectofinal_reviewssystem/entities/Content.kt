@@ -7,10 +7,11 @@ data class Content(var id: String = "",
                    var review: ArrayList<Review> = arrayListOf(),
                    var type: String = "",
                    var categoria: String = "",
+                   var isbn:String? = "",
                    var tag: ArrayList<Tag> = arrayListOf()
 )
 {
-    fun toMap(): Map<String, Any> {
+    fun toMap(): Map<String, Any?> {
         return mapOf(
             "id" to id,
             "titulo" to titulo,
@@ -19,6 +20,7 @@ data class Content(var id: String = "",
             "review" to review.map { it.toMap() },
             "type" to type,
             "categoria" to categoria,
+            "isbn" to isbn,
             "tag" to tag.map { it.toMap() }
         )
     }

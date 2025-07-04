@@ -21,8 +21,13 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
+import rodriguez.jairo.proyectofinal_reviewssystem.entities.Review
+import rodriguez.jairo.proyectofinal_reviewssystem.entities.Tag
+import java.util.UUID
 
 class AddContent : AppCompatActivity() {
 
@@ -44,12 +49,15 @@ class AddContent : AppCompatActivity() {
     private lateinit var btnCancel: Button
     private lateinit var btnAddCustomTag: Button
 
+    // Firebase ViewModel
+    private lateinit var contentViewModel: ContentViewModel
+
     private val selectedTags = mutableListOf<String>()
     private val stars = mutableListOf<ImageView>()
     private var selectedRating = 0
     private var selectedImageUri: Uri? = null
 
-    //  Lista de tags predefinidos
+    // Lista de tags predefinidos
     private val predefinedTags = listOf(
         "action hero", "alternate history", "anime", "based on book", "based on play", "based on comic",
         "based on comic book", "based on novel", "based on story", "based on manga", "experimental film",
@@ -74,6 +82,9 @@ class AddContent : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        // Inicializar ViewModel
+        contentViewModel = ViewModelProvider(this)[ContentViewModel::class.java]
 
         initializeViews()
         setupClickListeners()
@@ -107,31 +118,26 @@ class AddContent : AppCompatActivity() {
         stars.add(findViewById(R.id.star5))
     }
 
-    //  Configurar tags predefinidos dinámicamente
     private fun setupPredefinedTags() {
         chipGroupTags.removeAllViews()
-
         predefinedTags.forEach { tagText ->
             addChipToGroup(tagText, false)
         }
     }
 
-    //  Función para agregar chips al grupo
     private fun addChipToGroup(text: String, isCustom: Boolean = false) {
         val chip = Chip(this)
         chip.text = text
         chip.isCheckable = true
         chip.isClickable = true
-        chip.isCloseIconVisible = isCustom // Solo los tags personalizados pueden eliminarse
+        chip.isCloseIconVisible = isCustom
 
-        // Aplicar estilo personalizado
         chip.setChipBackgroundColorResource(R.color.chip_background_selector)
         chip.setTextColor(ContextCompat.getColorStateList(this, R.color.chip_text_color_selector))
         chip.chipStrokeColor = ContextCompat.getColorStateList(this, R.color.chip_stroke_selector)
         chip.chipStrokeWidth = 2.dpToPx()
         chip.textSize = 14f
 
-        // Listener para selección/deselección
         chip.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 if (selectedTags.size >= 5) {
@@ -143,10 +149,8 @@ class AddContent : AppCompatActivity() {
             } else {
                 selectedTags.remove(text)
             }
-            Log.d("SelectedTags", "Tags seleccionados: $selectedTags")
         }
 
-        // Listener para eliminar tags personalizados
         if (isCustom) {
             chip.setOnCloseIconClickListener {
                 if (chip.isChecked) {
@@ -160,7 +164,45 @@ class AddContent : AppCompatActivity() {
         chipGroupTags.addView(chip)
     }
 
-    // Mostrar diálogo para agregar tag personalizado
+    private fun setupClickListeners() {
+        setupContentTypeChips()
+        setupCategorySelector()
+        setupStarRating()
+        setupImagePicker()
+        setupButtonListeners()
+        setupCustomTagButton()
+    }
+
+    private fun setupContentTypeChips() {
+        chipGroupContentType.isSingleSelection = true
+
+        chipMovie.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                hideAdditionalFields()
+            }
+        }
+
+        chipSerie.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                hideAdditionalFields()
+            }
+        }
+
+        chipBook.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                showAdditionalFields()
+            } else {
+                hideAdditionalFields()
+            }
+        }
+    }
+
+    private fun setupCustomTagButton() {
+        btnAddCustomTag.setOnClickListener {
+            showAddCustomTagDialog()
+        }
+    }
+
     private fun showAddCustomTagDialog() {
         val editText = EditText(this)
         editText.hint = "Write your custom tag"
@@ -168,7 +210,6 @@ class AddContent : AppCompatActivity() {
         editText.setTextColor(ContextCompat.getColor(this, R.color.white))
         editText.setHintTextColor(ContextCompat.getColor(this, R.color.subtituloGris))
 
-        // Configurar padding
         val padding = 16.dpToPx().toInt()
         editText.setPadding(padding, padding, padding, padding)
 
@@ -189,7 +230,6 @@ class AddContent : AppCompatActivity() {
             .show()
     }
 
-    //  Validar tag personalizado
     private fun validateCustomTag(tag: String): Boolean {
         return when {
             tag.isEmpty() -> {
@@ -212,7 +252,6 @@ class AddContent : AppCompatActivity() {
         }
     }
 
-    // NUEVO: Verificar si el tag ya existe
     private fun tagAlreadyExists(tag: String): Boolean {
         for (i in 0 until chipGroupTags.childCount) {
             val chip = chipGroupTags.getChildAt(i) as Chip
@@ -223,56 +262,10 @@ class AddContent : AppCompatActivity() {
         return false
     }
 
-    private fun setupClickListeners() {
-        setupContentTypeChips()
-        setupCategorySelector()
-        setupStarRating()
-        setupImagePicker()
-        setupButtonListeners()
-        setupCustomTagButton()
-    }
-
-    // Configurar ChipGroup para tipo de contenido
-    private fun setupContentTypeChips() {
-        // Configurar selección única para el tipo de contenido
-        chipGroupContentType.isSingleSelection = true
-
-        // Listeners para cada chip
-        chipMovie.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                hideAdditionalFields()
-                Log.d("ContentType", "Película seleccionada")
-            }
-        }
-
-        chipSerie.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                hideAdditionalFields()
-                Log.d("ContentType", "Serie seleccionada")
-            }
-        }
-
-        chipBook.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                showAdditionalFields()
-                Log.d("ContentType", "Libro seleccionado")
-            } else {
-                hideAdditionalFields()
-            }
-        }
-    }
-
-    // NUEVO: Configurar botón de tag personalizado
-    private fun setupCustomTagButton() {
-        btnAddCustomTag.setOnClickListener {
-            showAddCustomTagDialog()
-        }
-    }
-
     private fun setupButtonListeners() {
         btnAdd.setOnClickListener {
             if (validateForm()) {
-                addContent()
+                addContentToFirebase()
             }
         }
 
@@ -284,60 +277,22 @@ class AddContent : AppCompatActivity() {
     private fun validateForm(): Boolean {
         var isValid = true
 
-        // Validar título
-        if (!validateTitle()) {
-            isValid = false
-        }
+        if (!validateTitle()) isValid = false
+        if (!validateContentType()) isValid = false
+        if (chipBook.isChecked && !validateISBN()) isValid = false
+        if (!validateCategory()) isValid = false
+        if (!validateSynopsis()) isValid = false
+        if (!validateTags()) isValid = false
+        if (!validateTitleReview()) isValid = false
+        if (!validateReview()) isValid = false
+        if (!validateRating()) isValid = false
 
-        // Validar tipo de contenido
-        if (!validateContentType()) {
-            isValid = false
-        }
-
-        // Validar ISBN si es libro
-        if (chipBook.isChecked && !validateISBN()) {
-            isValid = false
-        }
-
-        // Validar categoría
-        if (!validateCategory()) {
-            isValid = false
-        }
-
-        // Validar sinopsis
-        if (!validateSynopsis()) {
-            isValid = false
-        }
-
-        // Validar tags
-        if (!validateTags()) {
-            isValid = false
-        }
-
-        // Validar título de reseña
-        if (!validateTitleReview()) {
-            isValid = false
-        }
-
-        // Validar reseña
-        if (!validateReview()) {
-            isValid = false
-        }
-
-        // Validar calificación
-        if (!validateRating()) {
-            isValid = false
-        }
-
-        // Validar imagen
         validateImage()
-
         return isValid
     }
 
     private fun validateTitle(): Boolean {
         val title = etTitle.text.toString().trim()
-
         return when {
             title.isEmpty() -> {
                 etTitle.error = "Title is required"
@@ -361,10 +316,8 @@ class AddContent : AppCompatActivity() {
         }
     }
 
-    // MODIFICADO: Validar tipo de contenido usando chips
     private fun validateContentType(): Boolean {
         val hasSelection = chipMovie.isChecked || chipSerie.isChecked || chipBook.isChecked
-
         return if (!hasSelection) {
             showCustomToast("Select a content type (Movie, Series or Book)")
             false
@@ -375,7 +328,6 @@ class AddContent : AppCompatActivity() {
 
     private fun validateISBN(): Boolean {
         val isbn = etISBN.text.toString().trim()
-
         return when {
             isbn.isEmpty() -> {
                 etISBN.error = "ISBN is required for books"
@@ -396,7 +348,6 @@ class AddContent : AppCompatActivity() {
 
     private fun validateCategory(): Boolean {
         val category = etCategory.text.toString().trim()
-
         return when {
             category.isEmpty() -> {
                 showCustomToast("Select a category")
@@ -409,7 +360,6 @@ class AddContent : AppCompatActivity() {
 
     private fun validateSynopsis(): Boolean {
         val synopsis = etSynopsis.text.toString().trim()
-
         return when {
             synopsis.isEmpty() -> {
                 etSynopsis.error = "Synopsis is required"
@@ -449,7 +399,6 @@ class AddContent : AppCompatActivity() {
 
     private fun validateTitleReview(): Boolean {
         val titleReview = etTitleReview.text.toString().trim()
-
         return when {
             titleReview.isEmpty() -> {
                 etTitleReview.error = "Review title is required"
@@ -475,7 +424,6 @@ class AddContent : AppCompatActivity() {
 
     private fun validateReview(): Boolean {
         val review = etReview.text.toString().trim()
-
         return when {
             review.isEmpty() -> {
                 etReview.error = "Review is required"
@@ -519,7 +467,6 @@ class AddContent : AppCompatActivity() {
 
     private fun isValidISBN(isbn: String): Boolean {
         val cleanISBN = isbn.replace("-", "").replace(" ", "")
-
         return when (cleanISBN.length) {
             10 -> isValidISBN10(cleanISBN)
             13 -> isValidISBN13(cleanISBN)
@@ -529,35 +476,31 @@ class AddContent : AppCompatActivity() {
 
     private fun isValidISBN10(isbn: String): Boolean {
         if (!isbn.matches(Regex("^[0-9]{9}[0-9X]$"))) return false
-
         var sum = 0
         for (i in 0..8) {
             sum += (isbn[i].toString().toInt()) * (10 - i)
         }
-
         val checkDigit = if (isbn[9] == 'X') 10 else isbn[9].toString().toInt()
         return (sum + checkDigit) % 11 == 0
     }
 
     private fun isValidISBN13(isbn: String): Boolean {
         if (!isbn.matches(Regex("^[0-9]{13}$"))) return false
-
         var sum = 0
         for (i in isbn.indices) {
             val digit = isbn[i].toString().toInt()
             sum += if (i % 2 == 0) digit else digit * 3
         }
-
         return sum % 10 == 0
     }
 
-
-    private fun addContent() {
+    // NUEVA FUNCIÓN: Agregar contenido a Firebase
+    private fun addContentToFirebase() {
         val title = etTitle.text.toString().trim()
         val contentType = when {
-            chipMovie.isChecked -> "Movie"
-            chipSerie.isChecked -> "Series"
-            chipBook.isChecked -> "Book"
+            chipMovie.isChecked -> "movies"
+            chipSerie.isChecked -> "series"
+            chipBook.isChecked -> "books"
             else -> ""
         }
         val isbn = if (chipBook.isChecked) etISBN.text.toString().trim() else ""
@@ -567,25 +510,43 @@ class AddContent : AppCompatActivity() {
         val review = etReview.text.toString().trim()
         val shareReviews = switchShareReviews.isChecked
 
+        // Crear la review
+        val reviewObject = Review(
+            id = UUID.randomUUID().toString(),
+            rating = selectedRating,
+            titulo = titleReview,
+            review = review,
+            compartir = shareReviews
+        )
+
+        // Crear los tags
+        val tagObjects = selectedTags.map { tagName ->
+            Tag(
+                id = UUID.randomUUID().toString(),
+                nombre = tagName
+            )
+        }
+
+        // Crear el contenido
+        val content = Content(
+            id = "", // Se asignará en el ViewModel
+            titulo = title,
+            estrellas = selectedRating,
+            imagen = selectedImageUri?.toString()?.hashCode() ?: 0, // Temporal - necesitarás manejar las imágenes
+            review = arrayListOf(reviewObject),
+            type = contentType,
+            categoria = category,
+            isbn = isbn.ifEmpty { null },
+            tag = ArrayList(tagObjects)
+        )
+
+        // Mostrar confirmación
         AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle("Confirm addition")
             .setMessage("Are you sure you want to add this content?")
             .setPositiveButton("Yes") { _, _ ->
-                Log.d("AddContent", """
-                Contenido agregado:
-                Título: $title
-                Tipo: $contentType
-                ISBN: $isbn
-                Categoría: $category
-                Sinopsis: $synopsis
-                Tags: $selectedTags
-                Título de reseña: $titleReview
-                Reseña: $review
-                Calificación: $selectedRating estrellas
-                Compartir reseñas: $shareReviews
-                Imagen: ${selectedImageUri?.toString() ?: "No seleccionada"}
-            """.trimIndent())
-
+                // Agregar a Firebase
+                contentViewModel.agregarContenidos(content)
                 showCustomToast("Content added successfully!")
 
                 Handler(Looper.getMainLooper()).postDelayed({
@@ -613,13 +574,6 @@ class AddContent : AppCompatActivity() {
                 .setNegativeButton("Continue editing") { dialog, _ ->
                     dialog.dismiss()
                 }
-                .setNeutralButton("Save and exit") { _, _ ->
-                    if (validateForm()) {
-                        saveContentAndExit()
-                    } else {
-                        showCustomToast("Please fix the errors before saving")
-                    }
-                }
                 .show()
         } else {
             val intent = Intent(this, Home::class.java)
@@ -628,47 +582,6 @@ class AddContent : AppCompatActivity() {
         }
     }
 
-    // MODIFICADO: Usar chips para determinar tipo de contenido
-    private fun saveContentAndExit() {
-        val title = etTitle.text.toString().trim()
-        val contentType = when {
-            chipMovie.isChecked -> "Movie"
-            chipSerie.isChecked -> "Series"
-            chipBook.isChecked -> "Book"
-            else -> ""
-        }
-        val isbn = if (chipBook.isChecked) etISBN.text.toString().trim() else ""
-        val category = etCategory.text.toString().trim()
-        val synopsis = etSynopsis.text.toString().trim()
-        val titleReview = etTitleReview.text.toString().trim()
-        val review = etReview.text.toString().trim()
-        val shareReviews = switchShareReviews.isChecked
-
-        Log.d("AddContent", """
-        Contenido guardado y saliendo:
-        Título: $title
-        Tipo: $contentType
-        ISBN: $isbn
-        Categoría: $category
-        Sinopsis: $synopsis
-        Tags: $selectedTags
-        Título de reseña: $titleReview
-        Reseña: $review
-        Calificación: $selectedRating estrellas
-        Compartir reseñas: $shareReviews
-        Imagen: ${selectedImageUri?.toString() ?: "No seleccionada"}
-    """.trimIndent())
-
-        showCustomToast("Content saved successfully!")
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, Home::class.java)
-            startActivity(intent)
-            finish()
-        }, 1000)
-    }
-
-    // MODIFICADO: Verificar cambios usando chips
     private fun hasUnsavedChanges(): Boolean {
         return etTitle.text.toString().trim().isNotEmpty() ||
                 etSynopsis.text.toString().trim().isNotEmpty() ||
@@ -694,8 +607,6 @@ class AddContent : AppCompatActivity() {
         }
         toast.show()
     }
-
-
 
     private fun Int.dpToPx(): Float {
         return this * resources.displayMetrics.density
@@ -735,15 +646,6 @@ class AddContent : AppCompatActivity() {
             .create()
 
         dialog.show()
-
-        dialog.listView?.let { listView ->
-            listView.setBackgroundColor(ContextCompat.getColor(this, R.color.fondoNegro))
-            for (i in 0 until listView.count) {
-                listView.getChildAt(i)?.let { child ->
-                    (child as? TextView)?.setTextColor(ContextCompat.getColor(this, R.color.white))
-                }
-            }
-        }
     }
 
     private fun setupStarRating() {
@@ -768,12 +670,6 @@ class AddContent : AppCompatActivity() {
     private fun setupImagePicker() {
         ivCoverImage.setOnClickListener {
             imagePickerLauncher.launch("image/*")
-        }
-    }
-
-    private fun setupSwitchListener() {
-        switchShareReviews.setOnCheckedChangeListener { _, isChecked ->
-            Log.d("ShareSwitch", "Share reviews checked: $isChecked")
         }
     }
 
