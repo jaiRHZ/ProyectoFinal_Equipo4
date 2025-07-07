@@ -13,29 +13,51 @@
         android:orientation="vertical"
         android:gravity="center">
 
-        <TextView
-            android:id="@+id/title_review"
+
+        <!-- Estrellas individuales -->
+        <LinearLayout
+            android:id="@+id/layoutStarsReview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="@font/inter_18pt_bold"
-            android:text="The Brutalist"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:gravity="center" />
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="8dp">
 
-        <ImageView
-            android:id="@+id/stars_review"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:scaleType="fitCenter" />
+            <ImageView
+                android:id="@+id/star1"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/btn_star_big_off"
+                android:contentDescription="star 1" />
 
-        <ImageView
-            android:id="@+id/image_review"
-            android:layout_width="100dp"
-            android:layout_height="150dp"
-            android:scaleType="centerCrop" />
+            <ImageView
+                android:id="@+id/star2"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/btn_star_big_off"
+                android:contentDescription="star 2" />
+
+            <ImageView
+                android:id="@+id/star3"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/btn_star_big_off"
+                android:contentDescription="star 3" />
+
+            <ImageView
+                android:id="@+id/star4"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/btn_star_big_off"
+                android:contentDescription="star 4" />
+
+            <ImageView
+                android:id="@+id/star5"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/btn_star_big_off"
+                android:contentDescription="star 5" />
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -48,7 +70,7 @@
         android:gravity="top">
 
         <TextView
-            android:id="@+id/review_text"
+            android:id="@+id/title_review"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
@@ -58,7 +80,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/description_text"
+            android:id="@+id/review"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/inter_18pt_regular"
