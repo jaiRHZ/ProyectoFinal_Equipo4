@@ -54,18 +54,24 @@ class AddContent : AppCompatActivity() {
 
     // Firebase ViewModel
     private lateinit var contentViewModel: ContentViewModel
+    private lateinit var tagViewModel: TagViewModel
+    private lateinit var reviewViewModel: ReviewViewModel
 
     private val selectedTags = mutableListOf<String>()
     private val stars = mutableListOf<ImageView>()
     private var selectedRating = 0
     private var selectedImageUri: Uri? = null
 
-    // Lista de tags predefinidos
-    private val predefinedTags = listOf(
-        "action hero", "alternate history", "anime", "based on book", "based on play", "based on comic",
-        "based on comic book", "based on novel", "based on story", "based on manga", "experimental film",
-        "independent film", "remake", "plot twist", "cult film", "bollywood", "post apocalypse"
-    )
+
+    private fun setupTagsFromFirebase() {
+        tagViewModel.listaTags.observe(this) { tags ->
+            chipGroupTags.removeAllViews()
+            selectedTags.clear()
+            tags.forEach { tag ->
+                addChipToGroup(tag.nombre, false)
+            }
+        }
+    }
 
     private val imagePickerLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -88,10 +94,12 @@ class AddContent : AppCompatActivity() {
 
         // Inicializar ViewModel
         contentViewModel = ViewModelProvider(this)[ContentViewModel::class.java]
+        tagViewModel = ViewModelProvider(this)[TagViewModel::class.java]
+        reviewViewModel = ViewModelProvider(this)[ReviewViewModel::class.java]
 
         initializeViews()
         setupClickListeners()
-        setupPredefinedTags()
+        setupTagsFromFirebase()
         initCloudinary()
     }
 
@@ -128,12 +136,6 @@ class AddContent : AppCompatActivity() {
         stars.add(findViewById(R.id.star5))
     }
 
-    private fun setupPredefinedTags() {
-        chipGroupTags.removeAllViews()
-        predefinedTags.forEach { tagText ->
-            addChipToGroup(tagText, false)
-        }
-    }
 
     private fun addChipToGroup(text: String, isCustom: Boolean = false) {
         val chip = Chip(this)
@@ -557,27 +559,35 @@ class AddContent : AppCompatActivity() {
             compartir = shareReviews
         )
 
-        // Crear los tags
-        val tagObjects = selectedTags.map { tagName ->
-            Tag(
-                id = UUID.randomUUID().toString(),
-                nombre = tagName
-            )
+// Guardar la review
+        reviewViewModel.agregarReviews(reviewObject)
+
+// Crear y guardar los tags (si son nuevos)
+        val tagIds = mutableListOf<String>()
+        selectedTags.forEach { tagName ->
+            val existingTag = tagViewModel.listaTags.value?.find { it.nombre.equals(tagName, true) }
+            if (existingTag != null) {
+                tagIds.add(existingTag.id)
+            } else {
+                val newTag = Tag(id = UUID.randomUUID().toString(), nombre = tagName)
+                tagViewModel.agregarTags(newTag)
+                tagIds.add(newTag.id)
+            }
         }
 
-        // Crear el contenido
+// Crear el contenido, relacionando IDs
         val content = Content(
-            id = "", // Se asignará en el ViewModel
+            id = "",
             titulo = title,
             sinopsis = synopsis,
             estrellas = selectedRating,
             imagen = imageUrl.hashCode(),
             urlImagen = imageUrl,
-            review = arrayListOf(reviewObject),
+            reviewIds = arrayListOf(reviewObject.id),
             type = contentType,
             categoria = category,
             isbn = isbn.ifEmpty { null },
-            tag = ArrayList(tagObjects)
+            tagIds = ArrayList(tagIds)
         )
 
         // Mostrar confirmación
