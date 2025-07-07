@@ -14,5 +14,7 @@
     <color name="tituloRojo">#E50914</color>
     <color name="botonGris">#363636</color>
     <color name="error">#FF0000</color>
+    <color name="fondoswitch">#111111</color>
+    <color name="boton_cancelar">#555555</color>
 
 </resources>
