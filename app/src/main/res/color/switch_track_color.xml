@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Activado (Checked) -->
+    <item android:color="@color/tituloRojo" android:state_checked="true"/>
+    <!-- Desactivado (Unchecked) -->
+    <item android:color="@color/fondoswitch" android:state_checked="false"/>
+</selector>

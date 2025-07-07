@@ -415,7 +415,7 @@
             android:textColor="@color/subtituloGris"
             android:textSize="24sp"
             android:padding="8dp"
-            app:trackTint="@color/tituloRojo"
+            app:trackTint="@color/switch_track_color"
             app:thumbTint="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -423,7 +423,7 @@
 
         <Button
             android:id="@+id/btnAdd"
-            android:background="@color/boton"
+            android:backgroundTint="@color/boton"
             android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -435,7 +435,7 @@
 
         <Button
             android:id="@+id/btnCancel"
-            android:background="@color/boton"
+            android:backgroundTint="@color/boton_cancelar"
             android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
