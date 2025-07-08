@@ -25,12 +25,14 @@ import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.firebase.auth.FirebaseAuth
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Review
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Tag
 import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.ContentViewModel
 import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.ReviewViewModel
 import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.TagViewModel
+import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.UserViewModel
 import java.util.UUID
 
 class AddContent : AppCompatActivity() {
@@ -57,6 +59,7 @@ class AddContent : AppCompatActivity() {
     private lateinit var contentViewModel: ContentViewModel
     private lateinit var tagViewModel: TagViewModel
     private lateinit var reviewViewModel: ReviewViewModel
+    private lateinit var userViewModel: UserViewModel
 
     private val selectedTags = mutableListOf<String>()
     private val stars = mutableListOf<ImageView>()
@@ -97,6 +100,7 @@ class AddContent : AppCompatActivity() {
         contentViewModel = ViewModelProvider(this)[ContentViewModel::class.java]
         tagViewModel = ViewModelProvider(this)[TagViewModel::class.java]
         reviewViewModel = ViewModelProvider(this)[ReviewViewModel::class.java]
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         initializeViews()
         setupClickListeners()
@@ -536,7 +540,7 @@ class AddContent : AppCompatActivity() {
 
     }
 
-    private fun addContentWithURL(imageUrl: String){
+    private fun addContentWithURL(imageUrl: String) {
         val title = etTitle.text.toString().trim()
         val contentType = when {
             chipMovie.isChecked -> "movies"
@@ -560,10 +564,10 @@ class AddContent : AppCompatActivity() {
             compartir = shareReviews
         )
 
-// Guardar la review
+        // Guardar la review
         reviewViewModel.agregarReviews(reviewObject)
 
-// Crear y guardar los tags (si son nuevos)
+        // Crear y guardar los tags (si son nuevos)
         val tagIds = mutableListOf<String>()
         selectedTags.forEach { tagName ->
             val existingTag = tagViewModel.listaTags.value?.find { it.nombre.equals(tagName, true) }
@@ -576,7 +580,7 @@ class AddContent : AppCompatActivity() {
             }
         }
 
-// Crear el contenido, relacionando IDs
+        // Crear el contenido, relacionando IDs
         val content = Content(
             id = "",
             titulo = title,
@@ -591,12 +595,29 @@ class AddContent : AppCompatActivity() {
             tagIds = ArrayList(tagIds)
         )
 
-        // Mostrar confirmación
+        // Actualizar la lista de reviews del usuario actual en Firestore
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+        if (currentUserUid != null) {
+
+            userViewModel.usuario.observe(this) { user ->
+                if (user != null) {
+                    val updatedReviewIds = user.myReviewIds.toMutableList()
+                    if (!updatedReviewIds.contains(reviewObject.id)) {
+                        updatedReviewIds.add(reviewObject.id)
+
+                        // Actualiza solo el campo myReviewIds en Firestore
+                        userViewModel.actualizarCamposUsuario(currentUserUid, mapOf("myReviewIds" to updatedReviewIds))
+                    }
+                }
+            }
+            
+        }
+
+        // Confirmación y guardado del contenido
         AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle("Confirm addition")
             .setMessage("Are you sure you want to add this content?")
             .setPositiveButton("Yes") { _, _ ->
-                // Agregar a Firebase
                 contentViewModel.agregarContenidos(content)
                 showCustomToast("Content added successfully!")
 
