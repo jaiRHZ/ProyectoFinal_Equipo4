@@ -3,17 +3,10 @@ package rodriguez.jairo.proyectofinal_reviewssystem
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.GridView
 import android.widget.ImageView
 import android.widget.SearchView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -21,8 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.firebase.auth.FirebaseAuth
+import rodriguez.jairo.proyectofinal_reviewssystem.adapters.ContentAdapter
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
-import java.util.Locale
+import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.ContentViewModel
+import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.UserViewModel
 
 
 class Home : AppCompatActivity() {
@@ -30,6 +26,9 @@ class Home : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var contentAdapter: ContentAdapter
     private lateinit var contentViewModel: ContentViewModel
+
+    private lateinit var userViewModel: UserViewModel
+    private var currentUserReviewIds = emptySet<String>()
 
     private var listaContenido = ArrayList<Content>()
     private lateinit var originalContenido: ArrayList<Content>
@@ -51,6 +50,7 @@ class Home : AppCompatActivity() {
         initViews()
         setupRecyclerView()
         setupViewModel()
+        setupUserViewModel()  // cargar usuario y reviews
         setupSearchView()
         setupChipsListener()
         setupClickListeners()
@@ -82,13 +82,84 @@ class Home : AppCompatActivity() {
         recyclerView.adapter = contentAdapter
     }
 
+    private fun setupUserViewModel() {
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+        userViewModel.usuario.observe(this) { user ->
+            currentUserReviewIds = user?.myReviewIds?.toSet() ?: emptySet()
+            // Cuando ya tenemos reviews y contenidos, aplicar filtros si toca
+            applyFiltersIfNeeded()
+        }
+        userViewModel.cargarUsuario(uid)
+    }
+
+    private fun applyFiltersIfNeeded() {
+        val filtersApplied = intent.getBooleanExtra("filters_applied", false)
+        if (!filtersApplied) {
+            filteredContenido = ArrayList(originalContenido)
+            applyContentTypeFilters()
+            return
+        }
+
+        val (tags, myReviews, exploreReviews) = loadReviewFilters()
+        filteredContenido = applyReviewFilters(tags, myReviews, exploreReviews, originalContenido, currentUserReviewIds)
+        applyContentTypeFilters()
+    }
+
+    private fun loadReviewFilters(): Triple<Set<String>, Boolean, Boolean> {
+        val prefs = getSharedPreferences("FilterPrefs", Context.MODE_PRIVATE)
+        val tags = prefs.getStringSet("selected_tags", emptySet()) ?: emptySet()
+        val myReviews = prefs.getBoolean("my_reviews_enabled", false)
+        val exploreReviews = prefs.getBoolean("explore_reviews_enabled", false)
+        return Triple(tags, myReviews, exploreReviews)
+    }
+
+    private fun applyReviewFilters(
+        tags: Set<String>,
+        myReviews: Boolean,
+        exploreReviews: Boolean,
+        contents: List<Content>,
+        myReviewIds: Set<String>
+    ): ArrayList<Content> {
+        return ArrayList(
+            contents.filter { content ->
+                val matchesTags = tags.isEmpty() || content.tagIds.any { tags.contains(it) }
+
+                val hasMyReview = content.reviewIds.any { myReviewIds.contains(it) }
+                val hasOtherReview = content.reviewIds.any { !myReviewIds.contains(it) }
+
+                val matchesReviewSource = when {
+                    myReviews && exploreReviews -> true
+                    myReviews -> hasMyReview
+                    exploreReviews -> hasOtherReview
+                    else -> true
+                }
+
+                matchesTags && matchesReviewSource
+            }
+        )
+    }
+
     private fun setupViewModel() {
         contentViewModel = ViewModelProvider(this)[ContentViewModel::class.java]
         contentViewModel.listaContenidos.observe(this) { contenidos ->
             listaContenido.clear()
             listaContenido.addAll(contenidos)
             originalContenido = ArrayList(listaContenido)
-            filteredContenido = ArrayList(listaContenido)
+
+            // Leer filtros de reviews
+            val (tags, myReviews, exploreReviews) = loadReviewFilters()
+
+            // Aplica los filtros si se solicitaron desde FilterReview
+            val filtersApplied = intent.getBooleanExtra("filters_applied", false)
+
+            filteredContenido = if (filtersApplied) {
+                applyReviewFilters(tags, myReviews, exploreReviews, listaContenido, currentUserReviewIds)
+            } else {
+                ArrayList(listaContenido)
+            }
+
             applyContentTypeFilters()
         }
     }

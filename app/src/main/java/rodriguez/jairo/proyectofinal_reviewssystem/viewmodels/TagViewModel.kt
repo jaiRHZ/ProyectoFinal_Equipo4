@@ -1,4 +1,4 @@
-package rodriguez.jairo.proyectofinal_reviewssystem
+package rodriguez.jairo.proyectofinal_reviewssystem.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -19,10 +19,10 @@ class TagViewModel: ViewModel() {
     val listaTags: LiveData<List<Tag>> = _listaTags
 
     init {
-        obtenerReviews()
+        obtenerTags()
     }
 
-    fun obtenerReviews(){
+    fun obtenerTags(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val resultado = db.collection("tags").get().await()

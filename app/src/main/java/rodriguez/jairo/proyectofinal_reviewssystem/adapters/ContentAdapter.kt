@@ -1,4 +1,4 @@
-package rodriguez.jairo.proyectofinal_reviewssystem
+package rodriguez.jairo.proyectofinal_reviewssystem.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import rodriguez.jairo.proyectofinal_reviewssystem.R
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
 
 class ContentAdapter(

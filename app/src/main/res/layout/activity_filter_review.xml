@@ -59,69 +59,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView9">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip1"
-            style="@style/CustomChipStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_tag_1"
-            android:textSize="20sp" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip2"
-            style="@style/CustomChipStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_tag_2"
-            android:textSize="20sp" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip3"
-            style="@style/CustomChipStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_tag_3"
-            android:textSize="20sp" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip4"
-            style="@style/CustomChipStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_tag_4"
-            android:textSize="20sp" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip5"
-            style="@style/CustomChipStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_tag_5"
-            android:textSize="20sp" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip6"
-            style="@style/CustomChipStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_tag_6"
-            android:textSize="20sp" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip7"
-            style="@style/CustomChipStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_tag_7"
-            android:textSize="20sp" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip8"
-            style="@style/CustomChipStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/filter_tag_8"
-            android:textSize="20sp" />
 
     </com.google.android.material.chip.ChipGroup>
 
@@ -136,7 +74,7 @@
         android:textColor="@color/white"
         android:textSize="16sp"
         android:padding="8dp"
-        app:trackTint="@color/tituloRojo"
+        app:trackTint="@color/switch_track_color"
         app:thumbTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -153,7 +91,7 @@
         android:textColor="@color/white"
         android:textSize="16sp"
         android:padding="8dp"
-        app:trackTint="@color/tituloRojo"
+        app:trackTint="@color/switch_track_color"
         app:thumbTint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
