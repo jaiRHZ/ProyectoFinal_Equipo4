@@ -1,12 +1,10 @@
 package rodriguez.jairo.proyectofinal_reviewssystem
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -30,6 +28,9 @@ import com.google.android.material.chip.ChipGroup
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Review
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Tag
+import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.ContentViewModel
+import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.ReviewViewModel
+import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.TagViewModel
 import java.util.UUID
 
 class AddContent : AppCompatActivity() {

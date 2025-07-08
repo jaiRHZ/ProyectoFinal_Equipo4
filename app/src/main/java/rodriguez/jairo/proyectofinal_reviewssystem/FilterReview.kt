@@ -3,7 +3,6 @@ package rodriguez.jairo.proyectofinal_reviewssystem
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -15,8 +14,10 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.TagViewModel
 
 
 class FilterReview : AppCompatActivity() {
@@ -26,6 +27,8 @@ class FilterReview : AppCompatActivity() {
     private lateinit var switchExploreReviews: SwitchCompat
     private lateinit var backButton: ImageView
     private lateinit var applyButton: Button
+
+    private lateinit var tagViewModel: TagViewModel
 
     private val selectedTags = mutableListOf<String>()
     private var isMyReviewsEnabled = false
@@ -42,6 +45,8 @@ class FilterReview : AppCompatActivity() {
         }
 
         initializeViews()
+        tagViewModel = ViewModelProvider(this)[TagViewModel::class.java]
+        setupTagsFromFirebase()
         setupListeners()
         loadSavedFilters()
     }
@@ -55,39 +60,63 @@ class FilterReview : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        setupTagsListener()
         setupSwitchesListener()
         setupNavigationListeners()
     }
 
-    private fun setupTagsListener() {
-        for (i in 0 until chipGroupTags.childCount) {
-            val chip = chipGroupTags.getChildAt(i) as Chip
-            chip.setOnCheckedChangeListener { _, isChecked ->
-                val tagText = chip.text.toString()
-                if (isChecked) {
-                    if (!selectedTags.contains(tagText)) {
-                        selectedTags.add(tagText)
+    private fun setupTagsFromFirebase() {
+        tagViewModel.listaTags.observe(this) { tags ->
+            chipGroupTags.removeAllViews()
+            selectedTags.clear()
+
+            tags.forEach { tag ->
+                val chip = Chip(this)
+                chip.text = tag.nombre  // Mostrar nombre al usuario
+                chip.isCheckable = true
+                chip.isClickable = true
+
+                chip.setChipBackgroundColorResource(R.color.chip_background_selector)
+                chip.setTextColor(ContextCompat.getColorStateList(this, R.color.chip_text_color_selector))
+                chip.chipStrokeColor = ContextCompat.getColorStateList(this, R.color.chip_stroke_selector)
+                chip.chipStrokeWidth = 2.dpToPx()
+                chip.textSize = 14f
+
+                chip.setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        selectedTags.add(tag.id)  // Guardamos el ID del tag, no el nombre
+                    } else {
+                        selectedTags.remove(tag.id)
                     }
-                } else {
-                    selectedTags.remove(tagText)
+                    validateFilters()
                 }
-                Log.d("SelectedTags", "Tags seleccionados: $selectedTags")
-                validateFilters()
+
+                chipGroupTags.addView(chip)
+            }
+
+            // Cargar tags guardados por ID y marcar chips correspondientes
+            val savedTagIds = getSharedPreferences("FilterPrefs", Context.MODE_PRIVATE)
+                .getStringSet("selected_tags", emptySet()) ?: emptySet()
+
+            for (i in 0 until chipGroupTags.childCount) {
+                val chip = chipGroupTags.getChildAt(i) as Chip
+                val tag = tags[i]
+                chip.isChecked = savedTagIds.contains(tag.id)
             }
         }
+    }
+
+    private fun Int.dpToPx(): Float {
+        return this * resources.displayMetrics.density
     }
 
     private fun setupSwitchesListener() {
         switchMyReviews.setOnCheckedChangeListener { _, isChecked ->
             isMyReviewsEnabled = isChecked
-            Log.d("FilterSwitch", "My Reviews: $isChecked")
             validateFilters()
         }
 
         switchExploreReviews.setOnCheckedChangeListener { _, isChecked ->
             isExploreReviewsEnabled = isChecked
-            Log.d("FilterSwitch", "Explore Reviews: $isChecked")
             validateFilters()
         }
     }
@@ -95,10 +124,10 @@ class FilterReview : AppCompatActivity() {
     private fun setupNavigationListeners() {
         backButton.setOnClickListener {
             showConfirmationDialog(
-                title = "Discard changes?", // "¿Descartar cambios?"
-                message = "Filters will not be applied if you go back now", // "Los filtros no se aplicarán si regresas ahora"
+                title = "Discard changes?",
+                message = "Filters will not be applied if you go back now",
                 onConfirm = { navigateToHome(applyFilters = false) },
-                onCancel = { /* no-op */ }
+                onCancel = { }
             )
         }
 
@@ -114,20 +143,8 @@ class FilterReview : AppCompatActivity() {
     }
 
     private fun validateAndApplyFilters(): Boolean {
-        if (selectedTags.isEmpty() && !isMyReviewsEnabled && !isExploreReviewsEnabled) {
-            showCustomToast("All reviews will be shown") // "Se mostrarán todas las revisiones"
-        } else if (selectedTags.isNotEmpty() && !isMyReviewsEnabled && !isExploreReviewsEnabled) {
-            showCustomToast("Tag filters applied to all reviews") // "Filtros de tags aplicados a todas las revisiones"
-        } else if (selectedTags.isEmpty() && (isMyReviewsEnabled || isExploreReviewsEnabled)) {
-            val reviewType = when {
-                isMyReviewsEnabled && isExploreReviewsEnabled -> "my reviews and community reviews" // "mis revisiones y revisiones de la comunidad"
-                isMyReviewsEnabled -> "my reviews" // "mis revisiones"
-                else -> "community reviews" // "revisiones de la comunidad"
-            }
-            showCustomToast("All $reviewType will be shown") // "Se mostrarán todas las $reviewType"
-        }
-
         applyFilters()
+        showCustomToast("Filters applied successfully")
         return true
     }
 
@@ -140,9 +157,6 @@ class FilterReview : AppCompatActivity() {
             putBoolean("filters_applied", true)
             apply()
         }
-
-        Log.d("FiltersApplied", "Tags: $selectedTags, MyReviews: $isMyReviewsEnabled, ExploreReviews: $isExploreReviewsEnabled")
-        showCustomToast("Filters applied successfully") // "Filtros aplicados correctamente"
     }
 
     private fun loadSavedFilters() {
@@ -151,11 +165,6 @@ class FilterReview : AppCompatActivity() {
         val savedTags = sharedPrefs.getStringSet("selected_tags", emptySet()) ?: emptySet()
         selectedTags.clear()
         selectedTags.addAll(savedTags)
-
-        for (i in 0 until chipGroupTags.childCount) {
-            val chip = chipGroupTags.getChildAt(i) as Chip
-            chip.isChecked = savedTags.contains(chip.text.toString())
-        }
 
         isMyReviewsEnabled = sharedPrefs.getBoolean("my_reviews_enabled", false)
         isExploreReviewsEnabled = sharedPrefs.getBoolean("explore_reviews_enabled", false)

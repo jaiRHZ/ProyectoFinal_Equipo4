@@ -1,4 +1,4 @@
-package rodriguez.jairo.proyectofinal_reviewssystem
+package rodriguez.jairo.proyectofinal_reviewssystem.viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
