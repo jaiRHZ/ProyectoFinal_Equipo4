@@ -165,11 +165,11 @@ class Home : AppCompatActivity() {
     }
 
     private fun setupSearchView() {
-        val searchText = searchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
-        searchText?.apply {
-            setTextColor(ContextCompat.getColor(this@Home, R.color.black))
-            setHintTextColor(ContextCompat.getColor(this@Home, R.color.subtituloGris))
-        }
+//        val searchText = searchView.findViewById<EditText>(androidx.appcompat.R.id.searchView)
+//        searchText?.apply {
+//            setTextColor(ContextCompat.getColor(this@Home, R.color.black))
+//            setHintTextColor(ContextCompat.getColor(this@Home, R.color.subtituloGris))
+//        }
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
