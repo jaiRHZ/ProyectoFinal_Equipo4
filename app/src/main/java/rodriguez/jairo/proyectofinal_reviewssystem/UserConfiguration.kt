@@ -16,12 +16,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import java.util.Calendar
 
 import com.google.firebase.auth.auth
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.UserViewModel
 
 class UserConfiguration : AppCompatActivity() {
+    private lateinit var userViewModel: UserViewModel
 
     private lateinit var usernameSettings: EditText
     private lateinit var birthdayPicker: EditText
@@ -39,6 +43,7 @@ class UserConfiguration : AppCompatActivity() {
         setContentView(R.layout.activity_user_configuration)
 
         initComponents()
+        setupUserViewModel()
     }
 
     private fun initComponents() {
@@ -90,6 +95,25 @@ class UserConfiguration : AppCompatActivity() {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
         }
+    }
+
+    private fun setupUserViewModel() {
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid != null) {
+            userViewModel.cargarUsuario(uid)
+        }
+
+        userViewModel.usuario.observe(this) { user ->
+            user?.let {
+                usernameSettings.setText(it.name)
+                //Falta imagen de perfil
+                birthdayPicker.setText(it.birthdate)
+                genderSelector.setText(it.gender)
+            }
+        }
+
     }
 
     // Método para validar los campos
