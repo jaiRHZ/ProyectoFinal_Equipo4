@@ -219,7 +219,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="@string/signup_register_button"
-        android:background="@color/boton"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:background="@drawable/round_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:textColor="@color/white"
@@ -230,12 +232,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="@string/signup_login_button"
-        android:textColor="@color/white"
-        android:background="@color/boton"
+        android:fontFamily="@font/inter_18pt_regular"
+        android:text="@string/signup_already"
+        android:textSize="13sp"
+        android:background="?android:attr/selectableItemBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnRegister" />
+
+    <View
+        app:layout_constraintTop_toBottomOf="@+id/btnLogin"
+        android:layout_width="250dp"
+        android:layout_height="2dp"
+        android:background="@color/white"
+        android:layout_marginHorizontal="15dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

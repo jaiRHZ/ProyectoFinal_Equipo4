@@ -20,12 +20,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.Firebase
+import rodriguez.jairo.proyectofinal_reviewssystem.entities.User
+import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.UserViewModel
 import java.util.Calendar
 
 class SignUp : AppCompatActivity() {
+    private lateinit var userViewModel: UserViewModel
 
     private lateinit var auth: FirebaseAuth
 
@@ -47,6 +51,7 @@ class SignUp : AppCompatActivity() {
         }
 
         auth = Firebase.auth
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         initializeViews()
         setupClickListeners()
@@ -272,19 +277,29 @@ class SignUp : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Log.d("INFO", "signInWithEmail:success")
-                    val user = auth.currentUser
-                    showStyledToast("Registration successful!")
-                    val intent = Intent(this, Login::class.java)
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    startActivity(intent)
+                    val firebaseUser = auth.currentUser
+                    val uid = firebaseUser?.uid
+
+                    if (uid != null) {
+                        // Crear objeto User con los datos del formulario
+                        val nuevoUsuario = User(
+                            name = etName.text.toString().trim(),
+                            gender = etGender.text.toString().trim(),
+                            birthdate = etBirthdate.text.toString().trim(),
+                            urlImagen = "" // podrías establecer una imagen por defecto
+                        )
+
+                        // Guardar en Firestore
+                        userViewModel.guardarUsuario(uid, nuevoUsuario)
+
+                        showStyledToast("Registration successful!")
+                        startActivity(Intent(this, Login::class.java))
+                        finish()
+                    } else {
+                        Toast.makeText(this, "Error retrieving user UID", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
-                    Log.w("ERROR", "signInWithEmail:failure", task.exception)
-                    Toast.makeText(
-                        baseContext,
-                        "Registration failed.",
-                        Toast.LENGTH_SHORT,
-                    ).show()
+                    Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
                 // Mostrar mensaje de éxito
                 //showStyledToast("¡Registro exitoso!")

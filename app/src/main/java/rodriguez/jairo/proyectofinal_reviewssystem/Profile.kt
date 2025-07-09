@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,7 +30,7 @@ class Profile : AppCompatActivity() {
     private lateinit var contenidoUsuario: ArrayList<Content>
 
     private lateinit var userViewModel: UserViewModel
-    private lateinit var etUsername: EditText
+    private lateinit var etUsername: TextView
     private lateinit var profilePic: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {

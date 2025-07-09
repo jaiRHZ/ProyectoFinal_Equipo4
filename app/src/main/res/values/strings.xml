@@ -88,5 +88,6 @@
 
     <string name="edit_content_title">Edit Content</string>
     <string name="edit_content_apply_changes">Apply changes</string>
+    <string name="signup_already">Already have an account?</string>
 
 </resources>
