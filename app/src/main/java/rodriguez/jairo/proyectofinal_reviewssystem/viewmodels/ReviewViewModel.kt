@@ -18,6 +18,10 @@ class ReviewViewModel: ViewModel() {
     private var _listaReviews = MutableLiveData<List<Review>>(emptyList())
     val listaReviews: LiveData<List<Review>> = _listaReviews
 
+    // LiveData específico para reviews del usuario
+    private var _reviewsUsuario = MutableLiveData<List<Review>>(emptyList())
+    val reviewsUsuario: LiveData<List<Review>> = _reviewsUsuario
+
     init {
         obtenerReviews()
     }
@@ -35,8 +39,29 @@ class ReviewViewModel: ViewModel() {
         }
     }
 
+    fun obtenerReviewsDelUsuario(userId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val resultado = db.collection("reviews")
+                    .whereEqualTo("userId", userId)
+                    .get()
+                    .await()
+
+                val reviews = resultado.documents.mapNotNull { it.toObject(Review::class.java) }
+                _reviewsUsuario.postValue(reviews)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun agregarReviews(review: Review){
-        review.id = UUID.randomUUID().toString()
+        // NO generar nuevo ID si ya tiene uno
+                if (review.id.isEmpty()) {
+                    val docRef = db.collection("reviews").document()
+                    review.id = docRef.id
+                }
+
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 db.collection("reviews").document(review.id).set(review).await()

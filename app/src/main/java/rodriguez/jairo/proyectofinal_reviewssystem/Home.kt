@@ -52,9 +52,10 @@ class Home : AppCompatActivity() {
         setupViewModel()
         setupUserViewModel()  // cargar usuario y reviews
         setupSearchView()
+        loadSavedChipFilters() // cargar antes de los listeners
         setupChipsListener()
         setupClickListeners()
-        loadSavedChipFilters()
+
     }
 
     private fun initViews() {
@@ -188,22 +189,33 @@ class Home : AppCompatActivity() {
     }
 
     private fun setupChipsListener() {
+        // Desactivar listeners temporalmente
+        chipMovie.setOnCheckedChangeListener(null)
+        chipSerie.setOnCheckedChangeListener(null)
+        chipBook.setOnCheckedChangeListener(null)
+
+        // Configurar estados (esto no activará los listeners ahora)
+        chipMovie.isChecked = selectedContentTypes.contains("movies")
+        chipSerie.isChecked = selectedContentTypes.contains("series")
+        chipBook.isChecked = selectedContentTypes.contains("books")
+
+        // Ahora sí configurar los listeners
         chipMovie.setOnCheckedChangeListener { _, isChecked ->
             val type = "movies"
             if (isChecked) selectedContentTypes.add(type) else selectedContentTypes.remove(type)
-            applyContentTypeFilters()
+            if (::originalContenido.isInitialized) applyContentTypeFilters()
         }
 
         chipSerie.setOnCheckedChangeListener { _, isChecked ->
             val type = "series"
             if (isChecked) selectedContentTypes.add(type) else selectedContentTypes.remove(type)
-            applyContentTypeFilters()
+            if (::originalContenido.isInitialized) applyContentTypeFilters()
         }
 
         chipBook.setOnCheckedChangeListener { _, isChecked ->
             val type = "books"
             if (isChecked) selectedContentTypes.add(type) else selectedContentTypes.remove(type)
-            applyContentTypeFilters()
+            if (::originalContenido.isInitialized) applyContentTypeFilters()
         }
     }
 
@@ -242,17 +254,15 @@ class Home : AppCompatActivity() {
 
     private fun loadSavedChipFilters() {
         val sharedPrefs = getSharedPreferences("ContentTypeFilters", Context.MODE_PRIVATE)
-        val savedContentTypes = sharedPrefs.getStringSet("selected_content_types", emptySet()) ?: emptySet()
         selectedContentTypes.clear()
-        selectedContentTypes.addAll(savedContentTypes)
-
-        chipMovie.isChecked = sharedPrefs.getBoolean("movie_selected", false)
-        chipSerie.isChecked = sharedPrefs.getBoolean("serie_selected", false)
-        chipBook.isChecked = sharedPrefs.getBoolean("book_selected", false)
-
-        if (selectedContentTypes.isNotEmpty()) {
-            applyContentTypeFilters()
+        sharedPrefs.getStringSet("selected_content_types", emptySet())?.let {
+            selectedContentTypes.addAll(it)
         }
+
+        // Solo establecer los estados, los listeners se configurarán después
+        chipMovie.isChecked = selectedContentTypes.contains("movies")
+        chipSerie.isChecked = selectedContentTypes.contains("series")
+        chipBook.isChecked = selectedContentTypes.contains("books")
     }
 
     private fun setupClickListeners() {
