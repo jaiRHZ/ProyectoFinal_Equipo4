@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -25,10 +26,13 @@ import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Review
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Tag
+import rodriguez.jairo.proyectofinal_reviewssystem.entities.User
 import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.ContentViewModel
 import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.ReviewViewModel
 import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.TagViewModel
@@ -66,6 +70,9 @@ class AddContent : AppCompatActivity() {
     private var selectedRating = 0
     private var selectedImageUri: Uri? = null
 
+    companion object {
+        private var isCloudinaryInitialized = false
+    }
 
     private fun setupTagsFromFirebase() {
         tagViewModel.listaTags.observe(this) { tags ->
@@ -109,9 +116,16 @@ class AddContent : AppCompatActivity() {
     }
 
     private fun initCloudinary() {
-        val config: MutableMap<String, String> = HashMap()
-        config["cloud_name"] = "dob719uzm"
-        MediaManager.init(this, config)
+        try {
+            if (!isCloudinaryInitialized) {
+                val config = HashMap<String, String>()
+                config["cloud_name"] = "dob719uzm"
+                MediaManager.init(this, config)
+                isCloudinaryInitialized = true
+            }
+        } catch (e: IllegalStateException) {
+            Log.w("Cloudinary", "MediaManager ya estaba inicializado: ${e.message}")
+        }
     }
 
     private fun initializeViews() {
@@ -244,7 +258,7 @@ class AddContent : AppCompatActivity() {
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
             }
-            .show()
+            .create().show()
     }
 
     private fun validateCustomTag(tag: String): Boolean {
@@ -555,18 +569,6 @@ class AddContent : AppCompatActivity() {
         val review = etReview.text.toString().trim()
         val shareReviews = switchShareReviews.isChecked
 
-        // Crear la review
-        val reviewObject = Review(
-            id = UUID.randomUUID().toString(),
-            rating = selectedRating,
-            titulo = titleReview,
-            review = review,
-            compartir = shareReviews
-        )
-
-        // Guardar la review
-        reviewViewModel.agregarReviews(reviewObject)
-
         // Crear y guardar los tags (si son nuevos)
         val tagIds = mutableListOf<String>()
         selectedTags.forEach { tagName ->
@@ -580,52 +582,49 @@ class AddContent : AppCompatActivity() {
             }
         }
 
-        // Crear el contenido, relacionando IDs
+        // USAR IDs de Firestore en lugar de UUID
+        val contentId = Firebase.firestore.collection("contenidos").document().id
+        val reviewId = Firebase.firestore.collection("reviews").document().id
+        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+
+        if (currentUserUid == null) {
+            showCustomToast("Error: User not authenticated")
+            return
+        }
+
+        // Crear el contenido CON el reviewId ya incluido
         val content = Content(
-            id = "",
+            id = contentId,
             titulo = title,
             sinopsis = synopsis,
             estrellas = selectedRating,
             imagen = imageUrl.hashCode(),
             urlImagen = imageUrl,
-            reviewIds = arrayListOf(reviewObject.id),
+            reviewIds = arrayListOf(reviewId), // ← Agregar el reviewId aquí
             type = contentType,
             categoria = category,
             isbn = isbn.ifEmpty { null },
             tagIds = ArrayList(tagIds)
         )
 
-        // Actualizar la lista de reviews del usuario actual en Firestore
-        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
-        if (currentUserUid != null) {
+        // Crear la review con el contentId correcto
+        val reviewObject = Review(
+            id = reviewId, // ← Usar el ID generado por Firestore
+            userId = currentUserUid,
+            contentId = contentId, // ← Usar el mismo contentId
+            rating = selectedRating,
+            titulo = titleReview,
+            review = review,
+            compartir = shareReviews
+        )
 
-            userViewModel.usuario.observe(this) { user ->
-                if (user != null) {
-                    val updatedReviewIds = user.myReviewIds.toMutableList()
-                    if (!updatedReviewIds.contains(reviewObject.id)) {
-                        updatedReviewIds.add(reviewObject.id)
-
-                        // Actualiza solo el campo myReviewIds en Firestore
-                        userViewModel.actualizarCamposUsuario(currentUserUid, mapOf("myReviewIds" to updatedReviewIds))
-                    }
-                }
-            }
-            
-        }
-
-        // Confirmación y guardado del contenido
+        // Confirmación antes de guardar
         AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle("Confirm addition")
             .setMessage("Are you sure you want to add this content?")
             .setPositiveButton("Yes") { _, _ ->
-                contentViewModel.agregarContenidos(content)
-                showCustomToast("Content added successfully!")
-
-                Handler(Looper.getMainLooper()).postDelayed({
-                    val intent = Intent(this@AddContent, Home::class.java)
-                    startActivity(intent)
-                    finish()
-                }, 1000)
+                // Guardar toodo en el orden correcto
+                saveContentAndReview(content, reviewObject, currentUserUid)
             }
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
@@ -633,6 +632,63 @@ class AddContent : AppCompatActivity() {
             .show()
     }
 
+    private fun saveContentAndReview(content: Content, review: Review, userId: String) {
+        // 1. Guardar content PRIMERO y esperar resultado
+        Firebase.firestore.collection("contenidos").document(content.id)
+            .set(content)
+            .addOnSuccessListener {
+                // 2. Solo después guardar review
+                Firebase.firestore.collection("reviews").document(review.id)
+                    .set(review)
+                    .addOnSuccessListener {
+                        // 3. Solo después actualizar usuario
+                        updateUserReviews(userId, review.id)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("AddContent", "Error saving review: ${e.message}")
+                        showCustomToast("Error saving review")
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e("AddContent", "Error saving content: ${e.message}")
+                showCustomToast("Error saving content")
+            }
+    }
+
+    private fun updateUserReviews(userId: String, reviewId: String) {
+        Firebase.firestore.collection("users").document(userId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val user = snapshot.toObject(User::class.java)
+                if (user != null) {
+                    val updatedReviewIds = user.myReviewIds.toMutableList()
+                    if (!updatedReviewIds.contains(reviewId)) {
+                        updatedReviewIds.add(reviewId)
+
+                        Firebase.firestore.collection("users").document(userId)
+                            .update("myReviewIds", updatedReviewIds)
+                            .addOnSuccessListener {
+                                showCustomToast("Content added successfully!")
+
+                                // Navegar después de que TODO esté guardado
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    val intent = Intent(this@AddContent, Home::class.java)
+                                    startActivity(intent)
+                                    finish()
+                                }, 1000)
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("AddContent", "Error updating user: ${e.message}")
+                                showCustomToast("Error updating user data")
+                            }
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("AddContent", "Error getting user: ${e.message}")
+                showCustomToast("Error getting user data")
+            }
+    }
 
     private fun showCancelConfirmation() {
         if (hasUnsavedChanges()) {
@@ -647,7 +703,7 @@ class AddContent : AppCompatActivity() {
                 .setNegativeButton("Continue editing") { dialog, _ ->
                     dialog.dismiss()
                 }
-                .show()
+                .create().show()
         } else {
             val intent = Intent(this, Home::class.java)
             startActivity(intent)

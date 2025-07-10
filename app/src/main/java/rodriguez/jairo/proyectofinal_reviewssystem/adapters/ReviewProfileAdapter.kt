@@ -7,27 +7,26 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import androidx.recyclerview.widget.RecyclerView
-import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
-import rodriguez.jairo.proyectofinal_reviewssystem.entities.ReviewContent
 import rodriguez.jairo.proyectofinal_reviewssystem.R
+import rodriguez.jairo.proyectofinal_reviewssystem.entities.ReviewContent
 
-class ReviewProfileAdapter (
-    private val items: List<ReviewContent>,
-    private val onClick: (Content) -> Unit
+class ReviewProfileAdapter(
+    private var listaReviewsWithContent: List<ReviewContent>,
+    private val onClick: (ReviewContent) -> Unit
 ) : RecyclerView.Adapter<ReviewProfileAdapter.ViewHolder>() {
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val title: TextView = view.findViewById(R.id.title_movie)
-        val image: ImageView = view.findViewById(R.id.image_review)
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val contentImage: ImageView = itemView.findViewById(R.id.image_review)
+        val contentTitle: TextView = itemView.findViewById(R.id.title_movie)
         val stars = listOf(
             itemView.findViewById<ImageView>(R.id.star1),
-            itemView.findViewById(R.id.star2),
-            itemView.findViewById(R.id.star3),
-            itemView.findViewById(R.id.star4),
-            itemView.findViewById(R.id.star5)
+            itemView.findViewById<ImageView>(R.id.star2),
+            itemView.findViewById<ImageView>(R.id.star3),
+            itemView.findViewById<ImageView>(R.id.star4),
+            itemView.findViewById<ImageView>(R.id.star5)
         )
-        val titleReview: TextView = view.findViewById(R.id.title_review)
-        val review: TextView = view.findViewById(R.id.review)
+        val titleReview: TextView = itemView.findViewById(R.id.title_review)
+        val reviewText: TextView = itemView.findViewById(R.id.review)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -36,15 +35,24 @@ class ReviewProfileAdapter (
         return ViewHolder(view)
     }
 
+    override fun getItemCount(): Int = listaReviewsWithContent.size
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
-        val review = item.review
-        val content = item.content
+        val reviewWithContent = listaReviewsWithContent[position]
+        val review = reviewWithContent.review
+        val content = reviewWithContent.content
 
-        holder.title.text = item.content.titulo
-        holder.titleReview.text = item.review.titulo
-        holder.review.text = item.review.review
+        // Debug: Verificar datos
+        android.util.Log.d("ReviewAdapter", "Position: $position")
+        android.util.Log.d("ReviewAdapter", "Review titulo: ${review.titulo}")
+        android.util.Log.d("ReviewAdapter", "Content: $content")
+        android.util.Log.d("ReviewAdapter", "Content titulo: ${content?.titulo}")
 
+        // Configurar información de la review
+        holder.titleReview.text = review.titulo
+        holder.reviewText.text = review.review
+
+        // Configurar estrellas
         val rating = review.rating.coerceIn(0, 5)
         holder.stars.forEachIndexed { index, starView ->
             if (index < rating) {
@@ -54,19 +62,38 @@ class ReviewProfileAdapter (
             }
         }
 
-        if (!item.content.urlImagen.isNullOrEmpty()) {
-            Glide.with(holder.itemView.context)
-                .load(item.content.urlImagen)
-                .placeholder(R.drawable.placeholder)
-                .into(holder.image)
+        // Configurar información del contenido
+        if (content != null) {
+            holder.contentTitle.text = content.titulo
+
+            // Debug: Verificar valores
+            android.util.Log.d("ReviewAdapter", "urlImagen: ${content.urlImagen}")
+            android.util.Log.d("ReviewAdapter", "imagen: ${content.imagen}")
+
+            // Cargar imagen del contenido
+            if (!content.urlImagen.isNullOrEmpty()) {
+                android.util.Log.d("ReviewAdapter", "Cargando imagen desde URL")
+                Glide.with(holder.itemView.context)
+                    .load(content.urlImagen)
+                    .into(holder.contentImage)
+            } else {
+                android.util.Log.d("ReviewAdapter", "Cargando imagen desde recurso")
+                // Si no hay URL, usa imagen local (recurso)
+                holder.contentImage.setImageResource(content.imagen)
+            }
         } else {
-            holder.image.setImageResource(item.content.imagen)
+            android.util.Log.d("ReviewAdapter", "Content es null")
+            holder.contentTitle.text = "Sin título"
+            holder.contentImage.visibility = View.GONE
         }
 
         holder.itemView.setOnClickListener {
-            onClick(item.content)
+            onClick(reviewWithContent)
         }
     }
 
-    override fun getItemCount(): Int = items.size
+    fun actualizarLista(nuevaLista: List<ReviewContent>) {
+        listaReviewsWithContent = nuevaLista
+        notifyDataSetChanged()
+    }
 }

@@ -36,7 +36,12 @@ class ContentViewModel: ViewModel() {
     }
 
     fun agregarContenidos(contenido: Content){
-        contenido.id = UUID.randomUUID().toString()
+        // NO generar nuevo ID si ya tiene uno
+        if (contenido.id.isEmpty()) {
+            val docRef = db.collection("contenidos").document()
+            contenido.id = docRef.id
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 db.collection("contenidos").document(contenido.id).set(contenido).await()

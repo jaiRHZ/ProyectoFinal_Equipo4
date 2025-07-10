@@ -2,7 +2,7 @@ package rodriguez.jairo.proyectofinal_reviewssystem
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.EditText
+import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -10,9 +10,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
-import rodriguez.jairo.proyectofinal_reviewssystem.adapters.ContentAdapter
 import rodriguez.jairo.proyectofinal_reviewssystem.adapters.ReviewProfileAdapter
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Content
+import rodriguez.jairo.proyectofinal_reviewssystem.entities.Review
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.ReviewContent
 import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.ContentViewModel
 import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.ReviewViewModel
@@ -20,32 +20,32 @@ import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.UserViewModel
 
 class Profile : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
-
-    private lateinit var contentAdapter: ContentAdapter
+    private lateinit var reviewContentAdapter: ReviewProfileAdapter
+    private lateinit var reviewViewModel: ReviewViewModel
     private lateinit var contentViewModel: ContentViewModel
-
-    private lateinit var reviewsAdapter: ReviewProfileAdapter
-    private lateinit var reviewsViewModel: ReviewViewModel
-    //private val films = ArrayList<Film>()
-    private lateinit var contenidoUsuario: ArrayList<Content>
-
     private lateinit var userViewModel: UserViewModel
     private lateinit var etUsername: TextView
     private lateinit var profilePic: ImageView
+
+    private var userReviews: List<Review> = emptyList()
+    private var allContents: List<Content> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        Log.d("Profile", "UID del usuario actual: $uid")
+
         initViews()
-        //cargarPeliculas()
         setupRecyclerView()
         setupUserViewModel()
+        setupContentViewModel()
+        setupReviewViewModel()
     }
 
     private fun initViews() {
         recyclerView = findViewById(R.id.profile_reviews)
-
         etUsername = findViewById(R.id.profile_username)
         profilePic = findViewById(R.id.profile_picture)
 
@@ -70,80 +70,65 @@ class Profile : AppCompatActivity() {
 
         userViewModel.usuario.observe(this) { user ->
             user?.let {
-                etUsername.setText(it.name)
+                etUsername.text = it.name
                 //Falta imagen de perfil
             }
         }
-
     }
-
-//    private fun cargarPeliculas() {
-//        films.add(Film(
-//            "The Brutalist",
-//            R.drawable.stars,
-//            R.drawable.thebrutalist,
-//            "The work creates a character whose life is an amalgam of many people's true experiences during that period of time; so it is very...", // descripción larga
-//            "I can see why it got 3 Oscars",
-//            "movies"// review corta
-//        ))
-//
-//        films.add(Film(
-//            "Anora",
-//            R.drawable.stars,
-//            R.drawable.anora,
-//            "At its core is brutal class commentary, painting a very well presented contrast between two very different lifestyles.", // descripción larga
-//            "I liked it for the same reason people hated it",
-//            "movies"
-//        ))
-//
-//        films.add(Film(
-//            "Conclave",
-//            R.drawable.stars,
-//            R.drawable.conclave,
-//            "The Conclave is a great film that is sure to keep you on the edge of your seat and holding your breath. Edward Berger's vision is perfectly executed in just about every way possible.",
-//            "Oscar Worthy Through and Through",
-//            "movies"
-//        ))
-//    }
 
     private fun setupRecyclerView() {
+        reviewContentAdapter = ReviewProfileAdapter(emptyList()) { reviewContent ->
+            Log.d("Profile", "Click en review: ${reviewContent.review.titulo}")
+            navigateToContentDetail(reviewContent)
+        }
+
         recyclerView.layoutManager = LinearLayoutManager(this)
-        cargarReviewsDelUsuario()
-//        reviewsAdapter = ReviewsAdapter(films)
-//        recyclerView.adapter = reviewsAdapter
-//        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = reviewContentAdapter
     }
 
-    private fun cargarReviewsDelUsuario() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+    private fun setupContentViewModel() {
+        contentViewModel = ViewModelProvider(this)[ContentViewModel::class.java]
 
-        db.collection("reviews")
-            .whereEqualTo("userId", uid)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val reviews = snapshot.toObjects(rodriguez.jairo.proyectofinal_reviewssystem.entities.Review::class.java)
-                val listaCombinada = mutableListOf<ReviewContent>()
-
-                if (reviews.isEmpty()) return@addOnSuccessListener
-
-                for (review in reviews) {
-                    db.collection("content").document(review.contentId).get()
-                        .addOnSuccessListener { doc ->
-                            val content = doc.toObject(Content::class.java)
-                            if (content != null) {
-                                listaCombinada.add(ReviewContent(review, content))
-                                if (listaCombinada.size == reviews.size) {
-                                    mostrarReviews(listaCombinada)
-                                }
-                            }
-                        }
-                }
-            }
+        contentViewModel.listaContenidos.observe(this) { contenidos ->
+            allContents = contenidos
+            Log.d("Profile", "Contenidos cargados: ${contenidos.size}")
+            combineReviewsWithContent()
+        }
     }
 
-    private fun mostrarReviews(lista: List<ReviewContent>) {
-        val adapter = ReviewProfileAdapter(lista) { content ->
+    private fun setupReviewViewModel() {
+        reviewViewModel = ViewModelProvider(this)[ReviewViewModel::class.java]
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid != null) {
+            reviewViewModel.obtenerReviewsDelUsuario(uid)
+        }
+
+        reviewViewModel.reviewsUsuario.observe(this) { reviews ->
+            userReviews = reviews
+            Log.d("Profile", "Reviews del usuario: ${reviews.size}")
+            combineReviewsWithContent()
+        }
+    }
+
+    private fun combineReviewsWithContent() {
+        if (userReviews.isEmpty() || allContents.isEmpty()) {
+            Log.d("Profile", "Esperando datos: reviews=${userReviews.size}, contents=${allContents.size}")
+            return
+        }
+
+        val reviewsWithContent = userReviews.map { review ->
+            val content = allContents.find { it.id == review.contentId }
+            ReviewContent(review, content)
+        }
+
+        Log.d("Profile", "Combinando ${reviewsWithContent.size} reviews con contenido")
+        reviewContentAdapter.actualizarLista(reviewsWithContent)
+    }
+
+    private fun navigateToContentDetail(reviewWithContent: ReviewContent) {
+        val content = reviewWithContent.content
+        if (content != null) {
             val intent = Intent(this, Detail::class.java).apply {
                 putExtra("Title", content.titulo)
                 putExtra("ImageUrl", content.urlImagen)
@@ -151,35 +136,8 @@ class Profile : AppCompatActivity() {
                 putExtra("Rate", content.estrellas)
             }
             startActivity(intent)
+        } else {
+            Log.w("Profile", "No se puede navegar: contenido no disponible")
         }
-        recyclerView.adapter = adapter
     }
-
-//    inner class ReviewsAdapter(private val films: List<Film>) : RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
-//
-//        inner class ReviewViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-//            val titleTextView: TextView = itemView.findViewById(R.id.title_review)
-//            val starsImageView: ImageView = itemView.findViewById(R.id.stars_review)
-//            val movieImageView: ImageView = itemView.findViewById(R.id.image_review)
-//            val reviewTextView: TextView = itemView.findViewById(R.id.review_text)
-//            val descriptionTextView: TextView = itemView.findViewById(R.id.description_text)
-//        }
-//
-//        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
-//            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_review, parent, false)
-//            return ReviewViewHolder(view)
-//        }
-//
-//        override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
-//            val film = films[position]
-//            holder.titleTextView.text = film.title
-//            holder.starsImageView.setImageResource(film.stars)
-//            holder.movieImageView.setImageResource(film.image)
-//
-//            holder.reviewTextView.text = film.review
-//            holder.descriptionTextView.text = film.description
-//        }
-//
-//        override fun getItemCount(): Int = films.size
-//    }
 }
