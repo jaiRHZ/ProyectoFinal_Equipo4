@@ -273,8 +273,8 @@ class Home : AppCompatActivity() {
         val btnAdd: Button = findViewById(R.id.btnAddContent_home)
 
         profile.setOnClickListener {
-            // startActivity(Intent(this, Profile::class.java))  // ← Temporalmente comentado
-            Toast.makeText(this, "Perfil deshabilitado temporalmente", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, Profile::class.java))  // ← Temporalmente comentado
+            //Toast.makeText(this, "Perfil deshabilitado temporalmente", Toast.LENGTH_SHORT).show()
         }
         filter.setOnClickListener {
             startActivity(Intent(this, FilterReview::class.java))

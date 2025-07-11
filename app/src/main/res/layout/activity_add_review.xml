@@ -221,7 +221,7 @@
                     android:fontFamily="@font/inter_18pt_bold"
                     android:padding="8dp"
                     android:textColor="@color/subtituloGris"
-                    app:trackTint="@color/tituloRojo"
+                    app:trackTint="@color/switch_track_color"
                     app:thumbTint="@color/white"/>
 
             </LinearLayout>
