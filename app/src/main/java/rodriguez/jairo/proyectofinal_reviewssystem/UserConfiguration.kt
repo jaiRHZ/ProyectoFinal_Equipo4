@@ -151,18 +151,33 @@ class UserConfiguration : AppCompatActivity() {
     }
 
     // Método para guardar datos del usuario
+    // Método para guardar datos del usuario
     private fun saveUserData() {
         val username = usernameSettings.text.toString().trim()
         val birthday = birthdayPicker.text.toString().trim()
         val gender = genderSelector.text.toString().trim()
 
-        // Aquí puedes implementar la lógica para guardar los datos
+        // Obtener el UID del usuario actual
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
 
-        Toast.makeText(this, "Saved Successfully", Toast.LENGTH_SHORT).show()
+        if (uid != null) {
+            // Crear mapa con los campos a actualizar
+            val camposActualizados = mapOf(
+                "name" to username,
+                "birthdate" to birthday,
+                "gender" to gender
+            )
 
+            // Actualizar los campos del usuario usando el ViewModel
+            userViewModel.actualizarCamposUsuario(uid, camposActualizados)
 
-        val intent = Intent(this, Home::class.java)
-        startActivity(intent)
+            Toast.makeText(this, "Saved Successfully", Toast.LENGTH_SHORT).show()
+
+            val intent = Intent(this, Home::class.java)
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "Error: User not authenticated", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun showDatePicker() {

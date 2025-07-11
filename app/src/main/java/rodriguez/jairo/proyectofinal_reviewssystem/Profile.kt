@@ -129,12 +129,16 @@ class Profile : AppCompatActivity() {
     private fun navigateToContentDetail(reviewWithContent: ReviewContent) {
         val content = reviewWithContent.content
         if (content != null) {
-            val intent = Intent(this, Detail::class.java).apply {
-                putExtra("Title", content.titulo)
-                putExtra("ImageUrl", content.urlImagen)
-                putExtra("ImageLocal", content.imagen)
-                putExtra("Rate", content.estrellas)
-            }
+            val intent = Intent(this, Detail::class.java)
+            intent.putExtra("contentId", content.id)
+            intent.putExtra("title", content.titulo)
+            intent.putExtra("imageUrl", content.urlImagen)
+            intent.putExtra("imageLocal", content.imagen)
+            intent.putExtra("rate", content.estrellas)
+            intent.putExtra("category", content.categoria)
+            intent.putExtra("type", content.type)
+            intent.putExtra("synopsis", content.sinopsis)
+            // Puedes agregar más extras si Detail los necesita
             startActivity(intent)
         } else {
             Log.w("Profile", "No se puede navegar: contenido no disponible")
