@@ -42,16 +42,11 @@ class ContentAdapter(
         holder.titulo.text = contenido.titulo
 
         // Cargar imagen con Glide desde urlImagen si existe
-        if (!contenido.urlImagen.isNullOrEmpty()) {
-            Glide.with(holder.itemView.context)
-                .load(contenido.urlImagen)
-                .placeholder(R.drawable.placeholder) // Imagen de carga temporal (opcional)
-                .error(R.drawable.placeholder)       // Imagen si falla carga
-                .into(holder.imagen)
-        } else {
-            // Si no hay URL, usa imagen local (recurso)
-            holder.imagen.setImageResource(contenido.imagen)
-        }
+        Glide.with(holder.itemView.context)
+            .load(contenido.urlImagen.takeIf { !it.isNullOrBlank() })
+            .placeholder(R.drawable.placeholder)
+            .error(R.drawable.placeholder)
+            .into(holder.imagen)
 
         // Mostrar las estrellas llenas o vacías según el rating
         val rating = contenido.estrellas.coerceIn(0, 5)

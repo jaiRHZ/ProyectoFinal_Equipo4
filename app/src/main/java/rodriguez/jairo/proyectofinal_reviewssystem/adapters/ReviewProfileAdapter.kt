@@ -42,12 +42,6 @@ class ReviewProfileAdapter(
         val review = reviewWithContent.review
         val content = reviewWithContent.content
 
-        // Debug: Verificar datos
-        android.util.Log.d("ReviewAdapter", "Position: $position")
-        android.util.Log.d("ReviewAdapter", "Review titulo: ${review.titulo}")
-        android.util.Log.d("ReviewAdapter", "Content: $content")
-        android.util.Log.d("ReviewAdapter", "Content titulo: ${content?.titulo}")
-
         // Configurar información de la review
         holder.titleReview.text = review.titulo
         holder.reviewText.text = review.review
@@ -66,23 +60,15 @@ class ReviewProfileAdapter(
         if (content != null) {
             holder.contentTitle.text = content.titulo
 
-            // Debug: Verificar valores
-            android.util.Log.d("ReviewAdapter", "urlImagen: ${content.urlImagen}")
-            android.util.Log.d("ReviewAdapter", "imagen: ${content.imagen}")
+            // Cargar imagen con Glide, mostrando placeholder si no hay URL o falla carga
+            Glide.with(holder.itemView.context)
+                .load(content.urlImagen.takeIf { !it.isNullOrBlank() })
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.placeholder)
+                .into(holder.contentImage)
 
-            // Cargar imagen del contenido
-            if (!content.urlImagen.isNullOrEmpty()) {
-                android.util.Log.d("ReviewAdapter", "Cargando imagen desde URL")
-                Glide.with(holder.itemView.context)
-                    .load(content.urlImagen)
-                    .into(holder.contentImage)
-            } else {
-                android.util.Log.d("ReviewAdapter", "Cargando imagen desde recurso")
-                // Si no hay URL, usa imagen local (recurso)
-                holder.contentImage.setImageResource(content.imagen)
-            }
+            holder.contentImage.visibility = View.VISIBLE
         } else {
-            android.util.Log.d("ReviewAdapter", "Content es null")
             holder.contentTitle.text = "Sin título"
             holder.contentImage.visibility = View.GONE
         }
@@ -91,6 +77,7 @@ class ReviewProfileAdapter(
             onClick(reviewWithContent)
         }
     }
+
 
     fun actualizarLista(nuevaLista: List<ReviewContent>) {
         listaReviewsWithContent = nuevaLista

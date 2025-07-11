@@ -169,6 +169,13 @@ class AddContent : AppCompatActivity() {
         chip.chipStrokeWidth = 2.dpToPx()
         chip.textSize = 14f
 
+        // Marcar el chip automáticamente cuando se crea
+        chip.isChecked = true
+        // Añadir a selectedTags si no está ya agregado
+        if (!selectedTags.contains(text)) {
+            selectedTags.add(text)
+        }
+        
         chip.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 if (selectedTags.size >= 5) {
@@ -598,7 +605,6 @@ class AddContent : AppCompatActivity() {
             titulo = title,
             sinopsis = synopsis,
             estrellas = selectedRating,
-            imagen = imageUrl.hashCode(),
             urlImagen = imageUrl,
             reviewIds = arrayListOf(reviewId), // ← Agregar el reviewId aquí
             type = contentType,

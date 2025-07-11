@@ -88,13 +88,11 @@ class Home : AppCompatActivity() {
             intent.putExtra("contentId", content.id)
             intent.putExtra("title", content.titulo)
             intent.putExtra("imageUrl", content.urlImagen)
-            intent.putExtra("imageLocal", content.imagen)
             intent.putExtra("rate", content.estrellas)
             intent.putExtra("category", content.categoria)
             intent.putExtra("type", content.type)
             intent.putExtra("synopsis", content.sinopsis)
             // Puedes agregar más extras si Detail los necesita
-
             startActivity(intent)
         }
         recyclerView.layoutManager = LinearLayoutManager(this)
