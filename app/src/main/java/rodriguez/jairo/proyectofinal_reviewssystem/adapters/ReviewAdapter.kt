@@ -8,9 +8,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import rodriguez.jairo.proyectofinal_reviewssystem.R
 import rodriguez.jairo.proyectofinal_reviewssystem.entities.Review
+import rodriguez.jairo.proyectofinal_reviewssystem.entities.ReviewUser
 
 class ReviewAdapter(
-    private var listaReviews: List<Review>,
+    private var listaReviews: List<ReviewUser>,
     private val onClick: (Review) -> Unit
 ) : RecyclerView.Adapter<ReviewAdapter.ViewHolder>() {
 
@@ -22,23 +23,28 @@ class ReviewAdapter(
             itemView.findViewById(R.id.star4),
             itemView.findViewById(R.id.star5)
         )
+        val usernameReview: TextView = itemView.findViewById(R.id.username_review)
         val titleReview: TextView = itemView.findViewById(R.id.title_review)
         val reviewText: TextView = itemView.findViewById(R.id.review)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_review, parent, false)
+            .inflate(R.layout.item_review_detail, parent, false)
         return ViewHolder(view)
     }
 
     override fun getItemCount(): Int = listaReviews.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val review = listaReviews[position]
+        val reviewWithUser = listaReviews[position]
+        val review = reviewWithUser.review
+        val user = reviewWithUser.user
 
         holder.titleReview.text = review.titulo
         holder.reviewText.text = review.review
+        holder.usernameReview.text = user.name
+
 
         val rating = review.rating.coerceIn(0, 5)
         holder.stars.forEachIndexed { index, starView ->
@@ -54,7 +60,7 @@ class ReviewAdapter(
         }
     }
 
-    fun actualizarLista(nuevaLista: List<Review>) {
+    fun actualizarLista(nuevaLista: List<ReviewUser>) {
         listaReviews = nuevaLista
         notifyDataSetChanged()
     }

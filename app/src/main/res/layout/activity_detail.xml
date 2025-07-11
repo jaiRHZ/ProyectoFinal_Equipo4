@@ -88,7 +88,9 @@
                     android:textColor="@color/subtituloGris"
                     android:textSize="16sp"
                     android:textStyle="italic" />
+
                 <TextView
+                    android:id="@+id/viewContentCategory_detail"
                     android:text="Category"
                     android:textColor="@color/subtituloGris"
                     android:textStyle="bold"
