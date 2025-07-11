@@ -1,144 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:orientation="vertical"
     tools:context=".Home">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/profile_home"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <ImageView
+                android:id="@+id/profile_home"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:src="@drawable/baseline_account_circle_24" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="70dp"
+                android:fontFamily="@font/inter_18pt_bold"
+                android:padding="10dp"
+                android:text="@string/tittle_home"
+                android:textSize="32sp"
+                android:textAlignment="center" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp">
+
+            <ImageView
+                android:id="@+id/filter_home"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/filter"
+                />
+
+            <SearchView
+                android:id="@+id/searchView"
+                android:layout_width="280dp"
+                android:layout_height="40dp"
+                android:layout_marginRight="20dp"
+                android:iconifiedByDefault="false"
+                android:searchIcon="@drawable/ic_search"
+                android:queryBackground="@color/white"
+                android:queryHint="Buscar " />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:src="@drawable/baseline_account_circle_24" />
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="30dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupContentType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="50dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="50dp"
+                app:chipSpacingHorizontal="31dp"
+                app:chipSpacingVertical="4dp"
+                >
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipMovie"
+                    style="@style/CustomChipStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_content_type_movie"
+                    android:textSize="20sp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSerie"
+                    style="@style/CustomChipStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_content_type_serie"
+                    android:textSize="20sp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipBook"
+                    style="@style/CustomChipStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_content_type_book"
+                    android:textSize="20sp"
+                    />
+
+            </com.google.android.material.chip.ChipGroup>
+
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginLeft="70dp"
-            android:fontFamily="@font/inter_18pt_bold"
-            android:padding="10dp"
-            android:text="@string/tittle_home"
-            android:textSize="32sp"
-            android:textAlignment="center" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="10dp">
-
-        <ImageView
-            android:id="@+id/filter_home"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
-            android:src="@drawable/filter"
-            />
+            android:fontFamily="@font/inter_18pt_bold"
+            android:text="@string/popular_home"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
 
-        <SearchView
-            android:id="@+id/searchView"
-            android:layout_width="280dp"
-            android:layout_height="40dp"
-            android:layout_marginRight="20dp"
-            android:iconifiedByDefault="false"
-            android:searchIcon="@drawable/ic_search"
-            android:queryBackground="@color/white"
-            android:queryHint="Buscar " />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="30dp"
-        android:orientation="horizontal">
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroupContentType"
-            android:layout_width="wrap_content"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvContent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="50dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="50dp"
-            app:chipSpacingHorizontal="31dp"
-            app:chipSpacingVertical="4dp"
-            >
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipMovie"
-                style="@style/CustomChipStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/add_content_type_movie"
-                android:textSize="20sp" />
+            android:layout_marginTop="15dp"
+            android:numColumns="3"
+            android:paddingHorizontal="6dp" >
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipSerie"
-                style="@style/CustomChipStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/add_content_type_serie"
-                android:textSize="20sp" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipBook"
-                style="@style/CustomChipStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/add_content_type_book"
-                android:textSize="20sp"
-                />
-
-        </com.google.android.material.chip.ChipGroup>
+        </androidx.recyclerview.widget.RecyclerView>
 
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:fontFamily="@font/inter_18pt_bold"
-        android:text="@string/popular_home"
-        android:textColor="@color/white"
-        android:textSize="24sp" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvContent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:numColumns="3"
-        android:paddingHorizontal="6dp" >
-
-    </androidx.recyclerview.widget.RecyclerView>
-
-<LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:layout_gravity="end">
+    <!-- Botón flotante -->
     <Button
         android:id="@+id/btnAddContent_home"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
         android:text="+"
         android:textSize="25sp"
         android:background="@drawable/circle_button"
-        />
+        android:elevation="8dp" />
 
-</LinearLayout>
-</LinearLayout>
+</RelativeLayout>

@@ -97,12 +97,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
 
-                <TextView
-                    android:id="@+id/viewContentGenre_detail"
-                    android:text="genreType"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
                 <!-- Rating -->
                 <LinearLayout
 
