@@ -85,7 +85,6 @@ class Home : AppCompatActivity() {
             val intent = Intent(this, Detail::class.java).apply {
                 putExtra("title", content.titulo)
                 putExtra("imageUrl", content.urlImagen)
-                putExtra("imageLocal", content.imagen)
                 putExtra("rate", content.estrellas)
                 putExtra("category", content.categoria)
                 putExtra("type", content.type)

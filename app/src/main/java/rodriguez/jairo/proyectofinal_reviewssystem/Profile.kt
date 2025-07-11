@@ -132,7 +132,6 @@ class Profile : AppCompatActivity() {
             val intent = Intent(this, Detail::class.java).apply {
                 putExtra("Title", content.titulo)
                 putExtra("ImageUrl", content.urlImagen)
-                putExtra("ImageLocal", content.imagen)
                 putExtra("Rate", content.estrellas)
             }
             startActivity(intent)

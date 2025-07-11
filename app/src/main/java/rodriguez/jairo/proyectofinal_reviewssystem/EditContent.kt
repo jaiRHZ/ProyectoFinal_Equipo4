@@ -569,7 +569,6 @@ class EditContent : AppCompatActivity() {
                 titulo = title,
                 sinopsis = synopsis,
                 estrellas = selectedRating,
-                imagen = imageUrl.hashCode(),
                 urlImagen = imageUrl,
                 type = contentType,
                 categoria = category,
