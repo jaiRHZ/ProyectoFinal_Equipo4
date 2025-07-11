@@ -34,6 +34,7 @@ class Home : AppCompatActivity() {
     private var listaContenido = ArrayList<Content>()
     private lateinit var originalContenido: ArrayList<Content>
     private lateinit var filteredContenido: ArrayList<Content>
+    private lateinit var baseFilteredContenido: ArrayList<Content> // contenido filtrado por tags/reviews
 
     // Chips
     private lateinit var chipGroupContentType: ChipGroup
@@ -44,6 +45,10 @@ class Home : AppCompatActivity() {
     private lateinit var searchView: SearchView
     private val selectedContentTypes = mutableListOf<String>()
 
+    // Flags para sincronizar datos
+    private var isContentLoaded = false
+    private var isUserLoaded = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
@@ -51,12 +56,17 @@ class Home : AppCompatActivity() {
         initViews()
         setupRecyclerView()
         setupViewModel()
-        setupUserViewModel()  // cargar usuario y reviews
+        setupUserViewModel()
         setupSearchView()
-        loadSavedChipFilters() // cargar antes de los listeners
+        loadSavedChipFilters()
         setupChipsListener()
         setupClickListeners()
+    }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)  // actualizar intent actual
+        applyFiltersIfNeeded()
     }
 
     private fun initViews() {
@@ -71,7 +81,9 @@ class Home : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         filteredContenido = ArrayList()
+        baseFilteredContenido = ArrayList()
         contentAdapter = ContentAdapter(filteredContenido) { content ->
+
             val intent = Intent(this, Detail::class.java)
             intent.putExtra("contentId", content.id)
             intent.putExtra("title", content.titulo)
@@ -82,6 +94,7 @@ class Home : AppCompatActivity() {
             intent.putExtra("type", content.type)
             intent.putExtra("synopsis", content.sinopsis)
             // Puedes agregar más extras si Detail los necesita
+
             startActivity(intent)
         }
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -94,22 +107,35 @@ class Home : AppCompatActivity() {
 
         userViewModel.usuario.observe(this) { user ->
             currentUserReviewIds = user?.myReviewIds?.toSet() ?: emptySet()
-            // Cuando ya tenemos reviews y contenidos, aplicar filtros si toca
+            isUserLoaded = true
             applyFiltersIfNeeded()
         }
         userViewModel.cargarUsuario(uid)
     }
 
-    private fun applyFiltersIfNeeded() {
-        val filtersApplied = intent.getBooleanExtra("filters_applied", false)
-        if (!filtersApplied) {
-            filteredContenido = ArrayList(originalContenido)
-            applyContentTypeFilters()
-            return
+    private fun setupViewModel() {
+        contentViewModel = ViewModelProvider(this)[ContentViewModel::class.java]
+        contentViewModel.listaContenidos.observe(this) { contenidos ->
+            listaContenido.clear()
+            listaContenido.addAll(contenidos)
+            originalContenido = ArrayList(listaContenido)
+            isContentLoaded = true
+            applyFiltersIfNeeded()
         }
+    }
+
+    private fun applyFiltersIfNeeded() {
+        if (!isContentLoaded || !isUserLoaded) return
 
         val (tags, myReviews, exploreReviews) = loadReviewFilters()
-        filteredContenido = applyReviewFilters(tags, myReviews, exploreReviews, originalContenido, currentUserReviewIds)
+        val hasActiveFilters = tags.isNotEmpty() || myReviews || exploreReviews
+
+        baseFilteredContenido = if (hasActiveFilters) {
+            applyReviewFilters(tags, myReviews, exploreReviews, originalContenido, currentUserReviewIds)
+        } else {
+            ArrayList(originalContenido)
+        }
+
         applyContentTypeFilters()
     }
 
@@ -130,16 +156,18 @@ class Home : AppCompatActivity() {
     ): ArrayList<Content> {
         return ArrayList(
             contents.filter { content ->
+                // Filtrar por tags (si hay tags seleccionados)
                 val matchesTags = tags.isEmpty() || content.tagIds.any { tags.contains(it) }
 
+                // Revisar si el contenido tiene reviews del usuario actual o de otros
                 val hasMyReview = content.reviewIds.any { myReviewIds.contains(it) }
                 val hasOtherReview = content.reviewIds.any { !myReviewIds.contains(it) }
 
                 val matchesReviewSource = when {
-                    myReviews && exploreReviews -> true
+                    myReviews && exploreReviews -> true  // mostrar todos con reviews
                     myReviews -> hasMyReview
                     exploreReviews -> hasOtherReview
-                    else -> true
+                    else -> true  // sin filtro de review
                 }
 
                 matchesTags && matchesReviewSource
@@ -147,36 +175,7 @@ class Home : AppCompatActivity() {
         )
     }
 
-    private fun setupViewModel() {
-        contentViewModel = ViewModelProvider(this)[ContentViewModel::class.java]
-        contentViewModel.listaContenidos.observe(this) { contenidos ->
-            listaContenido.clear()
-            listaContenido.addAll(contenidos)
-            originalContenido = ArrayList(listaContenido)
-
-            // Leer filtros de reviews
-            val (tags, myReviews, exploreReviews) = loadReviewFilters()
-
-            // Aplica los filtros si se solicitaron desde FilterReview
-            val filtersApplied = intent.getBooleanExtra("filters_applied", false)
-
-            filteredContenido = if (filtersApplied) {
-                applyReviewFilters(tags, myReviews, exploreReviews, listaContenido, currentUserReviewIds)
-            } else {
-                ArrayList(listaContenido)
-            }
-
-            applyContentTypeFilters()
-        }
-    }
-
     private fun setupSearchView() {
-//        val searchText = searchView.findViewById<EditText>(androidx.appcompat.R.id.searchView)
-//        searchText?.apply {
-//            setTextColor(ContextCompat.getColor(this@Home, R.color.black))
-//            setHintTextColor(ContextCompat.getColor(this@Home, R.color.subtituloGris))
-//        }
-
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 searchView.clearFocus()
@@ -194,17 +193,17 @@ class Home : AppCompatActivity() {
     }
 
     private fun setupChipsListener() {
-        // Desactivar listeners temporalmente
+        // Desactivar temporalmente listeners para evitar llamados dobles
         chipMovie.setOnCheckedChangeListener(null)
         chipSerie.setOnCheckedChangeListener(null)
         chipBook.setOnCheckedChangeListener(null)
 
-        // Configurar estados (esto no activará los listeners ahora)
+        // Cargar estados guardados en selectedContentTypes
         chipMovie.isChecked = selectedContentTypes.contains("movies")
         chipSerie.isChecked = selectedContentTypes.contains("series")
         chipBook.isChecked = selectedContentTypes.contains("books")
 
-        // Ahora sí configurar los listeners
+        // Configurar listeners
         chipMovie.setOnCheckedChangeListener { _, isChecked ->
             val type = "movies"
             if (isChecked) selectedContentTypes.add(type) else selectedContentTypes.remove(type)
@@ -228,21 +227,22 @@ class Home : AppCompatActivity() {
         saveChipFilters()
         filteredContenido.clear()
 
-        val baseList = if (selectedContentTypes.isEmpty()) {
-            originalContenido
+        // Aplicar filtro por tipo de contenido sobre baseFilteredContenido
+        val filteredByType = if (selectedContentTypes.isEmpty()) {
+            baseFilteredContenido
         } else {
-            originalContenido.filter { selectedContentTypes.contains(it.type) }
+            baseFilteredContenido.filter { selectedContentTypes.contains(it.type) }
         }
 
-        val currentQuery = searchView.query.toString().lowercase()
-        if (currentQuery.isNotEmpty()) {
-            filteredContenido.addAll(baseList.filter {
-                it.titulo.lowercase().contains(currentQuery)
-            })
+        // Aplicar filtro por búsqueda
+        val query = searchView.query.toString().lowercase()
+        val filteredByQuery = if (query.isNotEmpty()) {
+            filteredByType.filter { it.titulo.lowercase().contains(query) }
         } else {
-            filteredContenido.addAll(baseList)
+            filteredByType
         }
 
+        filteredContenido.addAll(filteredByQuery)
         contentAdapter.actualizarLista(filteredContenido)
     }
 
@@ -264,7 +264,6 @@ class Home : AppCompatActivity() {
             selectedContentTypes.addAll(it)
         }
 
-        // Solo establecer los estados, los listeners se configurarán después
         chipMovie.isChecked = selectedContentTypes.contains("movies")
         chipSerie.isChecked = selectedContentTypes.contains("series")
         chipBook.isChecked = selectedContentTypes.contains("books")
