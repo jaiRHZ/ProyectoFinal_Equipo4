@@ -72,10 +72,15 @@ class Home : AppCompatActivity() {
         filteredContenido = ArrayList()
         contentAdapter = ContentAdapter(filteredContenido) { content ->
             val intent = Intent(this, Detail::class.java).apply {
-                putExtra("Title", content.titulo)
-                putExtra("ImageUrl", content.urlImagen)   // Cloudinary
-                putExtra("ImageLocal", content.imagen)    // fallback
-                putExtra("Rate", content.estrellas)
+                putExtra("title", content.titulo)
+                putExtra("imageUrl", content.urlImagen)   // Cloudinary
+                putExtra("imageLocal", content.imagen)    // fallback
+                putExtra("rate", content.estrellas)
+                putExtra("category", content.categoria)
+                putExtra("type", content.type)
+                putExtra("synopsis", content.sinopsis)
+                putExtra("", content.reviewIds)
+
             }
             startActivity(intent)
         }
