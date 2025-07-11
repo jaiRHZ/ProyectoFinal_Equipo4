@@ -71,7 +71,7 @@ class FilterReview : AppCompatActivity() {
 
             tags.forEach { tag ->
                 val chip = Chip(this)
-                chip.text = tag.nombre  // Mostrar nombre al usuario
+                chip.text = tag.nombre
                 chip.isCheckable = true
                 chip.isClickable = true
 
@@ -83,17 +83,17 @@ class FilterReview : AppCompatActivity() {
 
                 chip.setOnCheckedChangeListener { _, isChecked ->
                     if (isChecked) {
-                        selectedTags.add(tag.id)  // Guardamos el ID del tag, no el nombre
+                        selectedTags.add(tag.id)
                     } else {
                         selectedTags.remove(tag.id)
                     }
-                    validateFilters()
+                    // Aquí no necesitas validar filtros porque se aplican al dar click en aplicar
                 }
 
                 chipGroupTags.addView(chip)
             }
 
-            // Cargar tags guardados por ID y marcar chips correspondientes
+            // Marcar chips guardados
             val savedTagIds = getSharedPreferences("FilterPrefs", Context.MODE_PRIVATE)
                 .getStringSet("selected_tags", emptySet()) ?: emptySet()
 
@@ -112,12 +112,10 @@ class FilterReview : AppCompatActivity() {
     private fun setupSwitchesListener() {
         switchMyReviews.setOnCheckedChangeListener { _, isChecked ->
             isMyReviewsEnabled = isChecked
-            validateFilters()
         }
 
         switchExploreReviews.setOnCheckedChangeListener { _, isChecked ->
             isExploreReviewsEnabled = isChecked
-            validateFilters()
         }
     }
 
@@ -132,20 +130,10 @@ class FilterReview : AppCompatActivity() {
         }
 
         applyButton.setOnClickListener {
-            if (validateAndApplyFilters()) {
-                navigateToHome(applyFilters = true)
-            }
+            applyFilters()
+            showCustomToast("Filters applied successfully")
+            navigateToHome(applyFilters = true)
         }
-    }
-
-    private fun validateFilters(): Boolean {
-        return true // siempre válidos
-    }
-
-    private fun validateAndApplyFilters(): Boolean {
-        applyFilters()
-        showCustomToast("Filters applied successfully")
-        return true
     }
 
     private fun applyFilters() {
@@ -175,7 +163,7 @@ class FilterReview : AppCompatActivity() {
 
     private fun navigateToHome(applyFilters: Boolean) {
         val intent = Intent(this, Home::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
 
         if (applyFilters) {
             intent.putExtra("filters_applied", true)
@@ -194,8 +182,8 @@ class FilterReview : AppCompatActivity() {
         AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("Yes") { _, _ -> onConfirm() } // "Sí"
-            .setNegativeButton("No") { _, _ -> onCancel() } // "No"
+            .setPositiveButton("Yes") { _, _ -> onConfirm() }
+            .setNegativeButton("No") { _, _ -> onCancel() }
             .setCancelable(false)
             .show()
     }
@@ -211,34 +199,15 @@ class FilterReview : AppCompatActivity() {
         toast.show()
     }
 
-    private fun clearAllFilters() {
-        selectedTags.clear()
-        for (i in 0 until chipGroupTags.childCount) {
-            val chip = chipGroupTags.getChildAt(i) as Chip
-            chip.isChecked = false
-        }
-
-        switchMyReviews.isChecked = false
-        switchExploreReviews.isChecked = false
-        isMyReviewsEnabled = false
-        isExploreReviewsEnabled = false
-
-        showCustomToast("Filters cleared") // "Filtros limpiados"
-    }
-
     override fun onBackPressed() {
         showConfirmationDialog(
-            title = "Discard changes?", // "¿Descartar cambios?"
-            message = "Filters will not be applied if you exit now", // "Los filtros no se aplicarán si sales ahora"
+            title = "Discard changes?",
+            message = "Filters will not be applied if you exit now",
             onConfirm = {
                 super.onBackPressed()
                 navigateToHome(applyFilters = false)
             },
-            onCancel = { /* No hacer nada */ }
+            onCancel = { }
         )
-    }
-
-    fun addClearFiltersOption() {
-        // opcional
     }
 }

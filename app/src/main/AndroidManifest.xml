@@ -24,7 +24,8 @@
         <activity
             android:name=".Home"
             android:exported="false"
-            android:theme="@style/Theme.ProyectoFinal_ReviewsSystem" />
+            android:theme="@style/Theme.ProyectoFinal_ReviewsSystem"
+            android:launchMode="singleTop"/>
         <activity
             android:name=".EditContent"
             android:exported="false" />
