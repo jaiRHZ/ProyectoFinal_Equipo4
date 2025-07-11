@@ -598,7 +598,6 @@ class AddContent : AppCompatActivity() {
             titulo = title,
             sinopsis = synopsis,
             estrellas = selectedRating,
-            imagen = imageUrl.hashCode(),
             urlImagen = imageUrl,
             reviewIds = arrayListOf(reviewId), // ← Agregar el reviewId aquí
             type = contentType,
