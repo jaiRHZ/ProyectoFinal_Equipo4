@@ -1,161 +1,159 @@
 package rodriguez.jairo.proyectofinal_reviewssystem
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.firestore.firestore
 import rodriguez.jairo.proyectofinal_reviewssystem.adapters.ReviewAdapter
 import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.ReviewViewModel
 import rodriguez.jairo.proyectofinal_reviewssystem.viewmodels.UserViewModel
 
 class Detail : AppCompatActivity() {
+
     private lateinit var tvTitle: TextView
-    private lateinit var tvContentGenre: TextView
     private lateinit var tvContentCategory: TextView
     private lateinit var tvContentType: TextView
     private lateinit var tvContentSynopsis: TextView
-    private lateinit var tvContenRatingAverage: TextView
-    private lateinit var tvContentLearnMore: TextView
-
+    private lateinit var tvContentRating: TextView
+    private lateinit var ivCoverImage: ImageView
     private lateinit var recyclerView: RecyclerView
-    private lateinit var reviewUserAdapter: ReviewAdapter
+
+    private lateinit var reviewAdapter: ReviewAdapter
     private lateinit var reviewViewModel: ReviewViewModel
     private lateinit var userViewModel: UserViewModel
 
-//    private lateinit var reviewsAdapter: ReviewsAdapter
-//    private val films = ArrayList<Film>()
-//
+    private var contentId: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
-//
+
         initViews()
+        setupViewModels()
+        loadContentData()
         setupRecyclerView()
-        setUpContent()
         setupClickListeners()
-//
-//        val back: ImageView = findViewById(R.id.backHome_detail)
-//        back.setOnClickListener {
-//            val intent: Intent = Intent(this, Home::class.java)
-//            startActivity(intent)
-//        }
-//
-//        val buttonReview: Button = findViewById(R.id.btnAddReview)
-//        buttonReview.setOnClickListener {
-//            val intent: Intent = Intent(this, AddReview::class.java)
-//            startActivity(intent)
-//        }
-//
-//        //------------------------------------------------------------------------------------------
-//        val viewDetailContent = intent.extras
-//
-//        if (viewDetailContent != null){
-//            findViewById<TextView>(R.id.viewTitle_detail).text =viewDetailContent.getString("Title")
-//            findViewById<TextView>(R.id.averageRating_detail).text = viewDetailContent.getString("stars")
-//            findViewById<ImageView>(R.id.cover_detail).setImageResource(viewDetailContent.getInt("Image"))
-//            findViewById<TextView>(R.id.viewContentSynopsis_detail).text = viewDetailContent.getString("description")
-//            findViewById<TextView>(R.id.viewContentType_detail).text = viewDetailContent.getString("type")
-//
-//        }
-//
-//
-//        //Componentes
-//        setupRecyclerView()
-//    }
-//
-//
-//
-//
-//    private fun setupRecyclerView() {
-//        val recyclerView: RecyclerView = findViewById(R.id.detail_reviews)
-//        reviewsAdapter = ReviewsAdapter(films)
-//        recyclerView.adapter = reviewsAdapter
-//        recyclerView.layoutManager = LinearLayoutManager(this)
-//    }
-//
-//    //----------------------------------------------------------------------------------------------
-//
-//    inner class ReviewsAdapter(private val films: List<Film>) : RecyclerView.Adapter<ReviewsAdapter.ReviewViewHolder>() {
-//
-//        inner class ReviewViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-//            val titleTextView: TextView = itemView.findViewById(R.id.title_review)
-//            val starsImageView: ImageView = itemView.findViewById(R.id.stars_review)
-//            val movieImageView: ImageView = itemView.findViewById(R.id.image_review)
-//            val reviewTextView: TextView = itemView.findViewById(R.id.review_text)
-//            val descriptionTextView: TextView = itemView.findViewById(R.id.description_text)
-//        }
-//
-//        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReviewViewHolder {
-//            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_review, parent, false)
-//            return ReviewViewHolder(view)
-//        }
-//
-//        override fun onBindViewHolder(holder: ReviewViewHolder, position: Int) {
-//            val film = films[position]
-//            holder.titleTextView.text = film.title
-//            holder.starsImageView.setImageResource(film.stars)
-//            holder.movieImageView.setImageResource(film.image)
-//
-//            holder.reviewTextView.text = film.review
-//            holder.descriptionTextView.text = film.description
-//        }
-//
-//        override fun getItemCount(): Int = films.size
     }
 
     private fun initViews() {
         tvTitle = findViewById(R.id.viewTitle_detail)
-        tvContentGenre = findViewById(R.id.viewContentGenre_detail)
         tvContentCategory = findViewById(R.id.viewContentCategory_detail)
         tvContentType = findViewById(R.id.viewContentType_detail)
         tvContentSynopsis = findViewById(R.id.viewContentSynopsis_detail)
-        tvContenRatingAverage = findViewById(R.id.averageRating_detail)
-        tvContentLearnMore = findViewById(R.id.viewContentLearnMore_detail)
+        tvContentRating = findViewById(R.id.averageRating_detail)
+        ivCoverImage = findViewById(R.id.cover_detail)
         recyclerView = findViewById(R.id.detail_reviews)
     }
 
-    private fun setupRecyclerView() {
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = reviewUserAdapter
+    private fun setupViewModels() {
+        reviewViewModel = ViewModelProvider(this)[ReviewViewModel::class.java]
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
+
+        reviewViewModel.listaReviews.observe(this) { reviews ->
+            val filteredReviews = reviews.filter { it.contentId == contentId && it.compartir }
+            if (filteredReviews.isEmpty()) {
+                reviewAdapter.actualizarLista(emptyList())
+                return@observe
+            }
+
+            // Obtener los usuarios de los reviews
+            val userIds = filteredReviews.map { it.userId }.distinct()
+            val db = com.google.firebase.Firebase.firestore
+            db.collection("users").whereIn("name", userIds).get()
+                .addOnSuccessListener { result ->
+                    val users = result.documents.mapNotNull { it.toObject(rodriguez.jairo.proyectofinal_reviewssystem.entities.User::class.java) }
+                    val userMap = users.associateBy { it.name } // OJO: si el campo userId es el UID, deberías usar otro campo
+                    val reviewUsers = filteredReviews.map { review ->
+                        val user = userMap[review.userId] ?: rodriguez.jairo.proyectofinal_reviewssystem.entities.User(name = "Usuario")
+                        rodriguez.jairo.proyectofinal_reviewssystem.entities.ReviewUser(user = user, review = review)
+                    }
+                    reviewAdapter.actualizarLista(reviewUsers)
+                }
+                .addOnFailureListener {
+                    // Si falla, mostrar dummy
+                    val reviewUsers = filteredReviews.map { review ->
+                        rodriguez.jairo.proyectofinal_reviewssystem.entities.ReviewUser(
+                            user = rodriguez.jairo.proyectofinal_reviewssystem.entities.User(name = "Usuario"),
+                            review = review
+                        )
+                    }
+                    reviewAdapter.actualizarLista(reviewUsers)
+                }
+        }
     }
 
+    private fun loadContentData() {
+        intent.extras?.let { extras ->
+            try {
+                // 1. Datos básicos (con defaults seguros)
+                tvTitle.text = extras.getString("title", "Sin título")
+                tvContentCategory.text = "Category: ${extras.getString("category", "Desconocida")}"
+                tvContentType.text = "Type: ${extras.getString("type", "No especificado")}"
+                tvContentSynopsis.text = extras.getString("synopsis", "Non synopsis")
+                tvContentRating.text = "⭐ ${extras.getInt("rate", 0)}/5"
 
-    private fun setUpContent() {
-        intent.extras?.let { details ->
-            tvTitle.text = details.getString("title", "")
-            tvContentGenre.text = details.getString("genre", "")
-            tvContentCategory.text = details.getString("category", "")
-            tvContentType.text = details.getString("type", "")
-            tvContentSynopsis.text = details.getString("synopsis", "")
-            tvContenRatingAverage.text = details.getString("ratingAverage", "")
+                // 2. Imagen (con Glide para URL de Firebase)
+                try {
+                    val imageUrl = extras.getString("imageUrl")
+                    if (!imageUrl.isNullOrEmpty()) {
+                        com.bumptech.glide.Glide.with(this)
+                            .load(imageUrl)
+                            .placeholder(R.drawable.placeholder)
+                            .error(R.drawable.placeholder)
+                            .into(ivCoverImage)
+                    } else {
+                        extras.getInt("imageLocal", 0).takeIf { it != 0 }?.let { drawableId ->
+                            ivCoverImage.setImageResource(drawableId)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("Detail", "Error cargando imagen: ${e.message}")
+                    ivCoverImage.setImageResource(R.drawable.placeholder)
+                }
 
-            // Hacer scrollable la sinopsis si es necesario
-            //tvContentSynopsis.movementMethod = ScrollingMovementMethod()
+                // 3. Reviews (con validación de contentId)
+                contentId = extras.getString("contentId", "")
+                if (contentId.isEmpty()) {
+                    Log.e("Detail", "Error: contentId vacío")
+                    return
+                }
+                reviewViewModel.obtenerReviews()
+            } catch (e: Exception) {
+                Log.e("Detail", "Error inesperado: ${e.message}")
+                Toast.makeText(this, "Error al cargar el contenido", Toast.LENGTH_SHORT).show()
+            }
+        } ?: run {
+            Toast.makeText(this, "Datos inválidos", Toast.LENGTH_SHORT).show()
+            finish()
         }
-     }
+    }
+
+    private fun setupRecyclerView() {
+        reviewAdapter = ReviewAdapter(mutableListOf()) { }
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = reviewAdapter
+    }
 
     private fun setupClickListeners() {
-        val back: ImageView = findViewById(R.id.backHome_detail)
-        val buttonReview: Button = findViewById(R.id.btnAddReview)
-
-        back.setOnClickListener {
-            val intent: Intent = Intent(this, Home::class.java)
-            startActivity(intent)
+        findViewById<ImageView>(R.id.backHome_detail).setOnClickListener {
+            finish()
         }
 
-        buttonReview.setOnClickListener {
-            val intent: Intent = Intent(this, AddReview::class.java)
-            startActivity(intent)
+        findViewById<Button>(R.id.btnAddReview).setOnClickListener {
+            Intent(this, AddReview::class.java).apply {
+                putExtra("contentId", contentId)
+                putExtra("contentTitle", tvTitle.text.toString())
+                startActivity(this)
+            }
         }
     }
 }

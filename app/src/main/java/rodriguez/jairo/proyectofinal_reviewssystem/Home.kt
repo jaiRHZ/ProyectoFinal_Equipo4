@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -71,17 +72,16 @@ class Home : AppCompatActivity() {
     private fun setupRecyclerView() {
         filteredContenido = ArrayList()
         contentAdapter = ContentAdapter(filteredContenido) { content ->
-            val intent = Intent(this, Detail::class.java).apply {
-                putExtra("title", content.titulo)
-                putExtra("imageUrl", content.urlImagen)   // Cloudinary
-                putExtra("imageLocal", content.imagen)    // fallback
-                putExtra("rate", content.estrellas)
-                putExtra("category", content.categoria)
-                putExtra("type", content.type)
-                putExtra("synopsis", content.sinopsis)
-                putExtra("", content.reviewIds)
-
-            }
+            val intent = Intent(this, Detail::class.java)
+            intent.putExtra("contentId", content.id)
+            intent.putExtra("title", content.titulo)
+            intent.putExtra("imageUrl", content.urlImagen)
+            intent.putExtra("imageLocal", content.imagen)
+            intent.putExtra("rate", content.estrellas)
+            intent.putExtra("category", content.categoria)
+            intent.putExtra("type", content.type)
+            intent.putExtra("synopsis", content.sinopsis)
+            // Puedes agregar más extras si Detail los necesita
             startActivity(intent)
         }
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -276,9 +276,9 @@ class Home : AppCompatActivity() {
         val btnAdd: Button = findViewById(R.id.btnAddContent_home)
 
         profile.setOnClickListener {
-            startActivity(Intent(this, Profile::class.java))
+            // startActivity(Intent(this, Profile::class.java))  // ← Temporalmente comentado
+            Toast.makeText(this, "Perfil deshabilitado temporalmente", Toast.LENGTH_SHORT).show()
         }
-
         filter.setOnClickListener {
             startActivity(Intent(this, FilterReview::class.java))
         }
